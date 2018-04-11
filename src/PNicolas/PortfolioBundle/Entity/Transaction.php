@@ -9,6 +9,7 @@ class Transaction {
 	CONST CASH='CASH';
 	
 	public $id = null;
+	public $portfolio = null;
 	public $date = null;
 	public $share = null;
 	public $portfolio_share_code = null;
@@ -20,12 +21,13 @@ class Transaction {
 	
 	public $fee = null;
 	
-	public function set($id, \DateTime $date, \Share $share, $portfolio_share_code, $type, $quantity, $unit_price, $fee_fixed, $fee_percent) {
+	public function set($id, \Portfolio $portfolio, \DateTime $date, \Share $share, $portfolio_share_code, $type, $quantity, $unit_price, $fee_fixed, $fee_percent) {
 		if (!$this->isTypeAllowed($type)) {
 			throw new Exception('Type "'.$type.'" is not allowed.');
 		}
 		
 		$this->id = (int) $id;
+		$this->portfolio = $portfolio;
 		$this->date = $date;
 		$this->share = $share;
 		$this->portfolio_share_code = $portfolio_share_code;
