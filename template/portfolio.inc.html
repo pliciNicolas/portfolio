@@ -1,0 +1,36 @@
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <th>Share</th>
+            <th>Dividend</th>
+            <th>Return</th>
+            <th>Quantity</th>
+            <th>Buying Unit Price</th>
+            <th>Current Unit Price</th>
+            <th>Last Fee Fixed</th>
+            <th>Last Fee percent</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        foreach ($shares as $share) {
+            if ('ALL' == $type || (('INPROGRESS' == $type) && (0 < $share['quantity'])) || (('FINISH' == $type) && (0 == $share['quantity']))) {
+        ?>
+        <tr 
+            data-id_share="<?php echo $share->share->id; ?>"
+        >
+            <td><?php echo $share['share']->name; ?></td>
+            <td><?php echo $share['dividend']; ?></td>
+            <td><?php echo $share['balance']; ?></td>
+            <td><?php echo $share['quantity']; ?></td>
+            <td><?php echo $share['unit_price']; ?></td>
+            <td></td>
+            <td><?php echo $share['last_fee_fixed']; ?></td>
+            <td><?php echo $share['last_fee_percent']; ?></td>
+        </tr>
+        <?php 
+            }
+        }
+        ?>
+    </tbody>
+</table>

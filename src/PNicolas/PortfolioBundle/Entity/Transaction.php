@@ -20,10 +20,11 @@ class Transaction {
 	public $fee_percent = null;
 	
 	public $fee = null;
+	public $price = null;
 	
 	public function set($id, \Portfolio $portfolio, \DateTime $date, \Share $share, $portfolio_share_code, $type, $quantity, $unit_price, $fee_fixed, $fee_percent) {
-		if (!$this->isTypeAllowed($type)) {
-			throw new Exception('Type "'.$type.'" is not allowed.');
+		if (!in_array($type, $this->getTypeAllowed())) {
+			throw new Exception('Type "'.$type.'" is not allowed. Type available : '.implode(', ',$this->getTypeAllowed()));
 		}
 		
 		$this->id = (int) $id;
@@ -37,7 +38,12 @@ class Transaction {
 		$this->fee_fixed = (float) $fee_fixed;
 		$this->fee_percent = (float) $fee_percent;
 		
-		$this->fee = $this->fee_fixed + ($this->fee_percent * $this->quantity * $this->unit_price);
+		$this->fee = $this->fee_fixed + round($this->fee_percent * $this->quantity * $this->unit_price, 2);
+		
+		$this->price = ($this->unit_price * $this->quantity) - $this->fee;
+		if (self::BUY == $this->type) {
+			$this->price = ($this->unit_price * $this->quantity) + $this->fee;
+		}
 	}
 	
 	
@@ -46,12 +52,12 @@ class Transaction {
 	 * @param string $type
 	 * @return boolean
 	 */
-	public function isTypeAllowed($type) {
-		return in_array($type, [
+	public function getTypeAllowed() {
+		return [
 			self::BUY,
 			self::SELL,
 			self::DIVIDEND,
 			self::CASH,
-		]);
+		];
 	}
 }

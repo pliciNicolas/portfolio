@@ -9,7 +9,7 @@ class DashBoardController {
 	
 	private $transactions = null;
 	
-	private $tabs = null;
+	public $tabs = null;
 	
 	protected function loadData() {
 		$data_file = __DIR__.'/../../../../app/data.php';
@@ -70,20 +70,102 @@ class DashBoardController {
 	public function generate() {
 		$this->tabs = [];
 		$this->tabs['historic'] = [];
+		$this->tabs['performance'] = [
+			'byPortfolio' => [
+				'total' => [],
+				'portfolios' => [
+					
+				]
+			],
+			
+		];
 		
 		$this->loadData();
 		
 		foreach($this->transactions as $date => $transactions) {
 			foreach($transactions as $transaction) {
 				$this->tabs['historic'][] = $transaction;
+				
+				if (!array_key_exists($transaction->portfolio->id, $this->tabs['performance']['byPortfolio']['portfolios'])) {
+					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id] = $this->getPerformancePortfolioSkeletton();
+					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['portfolio'] = $transaction->portfolio;
+				}
+				
+				if (!array_key_exists($transaction->share->id,$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'])) {
+					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id] = $this->getPerformancePortfolioShareLineSkeletton();
+					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['share'] = $transaction->share;
+				}
+				
+				switch($transaction->type) {
+					case Transaction::BUY : 
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['spend'] += $transaction->price;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['unit_price'] = round(
+								(
+									$transaction->price 
+									+
+									(
+										$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['unit_price'] 
+										* 
+										$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['quantity']
+									)
+								) 
+								/ 
+								(
+									$transaction->quantity 
+									+ 
+									$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['quantity']
+								),2)
+								;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['quantity'] += $transaction->quantity;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['last_fee_fixed'] = $transaction->fee_fixed;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['last_fee_percent'] = $transaction->fee_percent;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['balance'] -= $transaction->price;
+						break;
+					case Transaction::SELL : 
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['recieved'] += $transaction->price;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['quantity'] -= $transaction->quantity;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['last_fee_fixed'] = $transaction->fee_fixed;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['last_fee_percent'] = $transaction->fee_percent;
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['balance'] += $transaction->price;
+						break;
+					case Transaction::DIVIDEND : 
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares'][$transaction->share->id]['dividend'] += $transaction->unit_price;
+						break;
+					case Transaction::CASH : 
+						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['total']['cash'] += $transaction->unit_price;
+						break;
+				}
 			}
 		}
 		
-echo '<pre>';
-//var_dump($users);
-//var_dump($shares);
-//var_dump($portfolios);
-//var_dump($this->transactions);
-var_dump($this->tabs);
+//echo '<pre>';
+//var_dump($this->tabs);
+	}
+	
+	
+	protected function getPerformancePortfolioSkeletton() {
+		return [
+			'total' => [
+				'cash' => 0
+			]
+			,'portfolio' => null
+			, 'shares' => []
+		];
+	}
+	
+	
+	protected function getPerformancePortfolioShareLineSkeletton() {
+		return [
+			'spend' => 0
+			,'recieved' => 0
+			,'quantity' => 0
+			,'unit_price' => 0
+			,'dividend' => 0
+			,'last_fee_fixed' => 0
+			,'last_fee_percent' => 0
+			,'return' => 0
+			,'share' => null
+			
+		];
 	}
 }

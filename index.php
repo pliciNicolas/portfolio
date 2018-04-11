@@ -5,6 +5,9 @@ $dashboard = new DashBoardController;
 
 try {
 	$dashboard->generate();
+	$templates = $dashboard->tabs;
+	include (__DIR__.'/template/index.html');
+	die();
 } catch (Exception $ex) {
 	echo $ex->getMessage();
 }
