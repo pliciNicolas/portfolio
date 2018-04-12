@@ -4,6 +4,7 @@ require (__DIR__.'/../Entity/User.php');
 require (__DIR__.'/../Entity/Share.php');
 require (__DIR__.'/../Entity/Portfolio.php');
 require (__DIR__.'/../Entity/Transaction.php');
+require (__DIR__.'/../Entity/Performance_Portfolio.php');
 
 class DashBoardController {
 	
@@ -80,16 +81,19 @@ class DashBoardController {
 		];
 		
 		$this->loadData();
-		
+
 		foreach($this->transactions as $date => $transactions) {
 			foreach($transactions as $transaction) {
 				$this->tabs['historic'][] = $transaction;
 				
 				if (!array_key_exists($transaction->portfolio->id, $this->tabs['performance']['byPortfolio']['portfolios'])) {
-					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id] = $this->getPerformancePortfolioSkeletton();
-					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['portfolio'] = $transaction->portfolio;
+					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id] = new Performance_Portfolio();
+					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]->portfolio = $transaction->portfolio;
 				}
 				
+				$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]->addTransaction($transaction);
+				
+				/*
 				if (!array_key_exists($transaction->share->id,$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'])) {
 					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id] = $this->getPerformancePortfolioShareLineSkeletton();
 					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['share'] = $transaction->share;
@@ -134,18 +138,24 @@ class DashBoardController {
 						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['total']['cash'] += $transaction->unit_price;
 						break;
 				}
+				 * 
+				 */
 			}
 		}
 		
-		foreach($this->tabs['performance']['byPortfolio']['portfolios'] as $id_portfolio => $detail_portfolio) {
-			foreach ($this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['all'] as $id_share => $share) {
-				if ($share['quantity']) {
-					$this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['active'][$id_share] = $share;
-				} else {
-					$this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['notActive'][$id_share] = $share;
-				}
-			}
+		foreach($this->tabs['performance']['byPortfolio']['portfolios'] as &$portfolio) {
+			$portfolio->sortShares();
+//			foreach ($this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['all'] as $id_share => $share) {
+//				if ($share['quantity']) {
+//					$this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['active'][$id_share] = $share;
+//				} else {
+//					$this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['notActive'][$id_share] = $share;
+//				}
+//			}
 		}
+echo '<pre>';
+var_dump($this->tabs['performance']['byPortfolio']['portfolios']);
+die();
 	}
 	
 	
