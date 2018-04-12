@@ -135,7 +135,7 @@
                         <?php 
                         foreach ($templates['performance']['byPortfolio']['portfolios'] as $portfolio) {
                         ?>
-                        <li><a href="#tab-performance-portfolio-<?php echo $portfolio->id;?>"><?php echo $portfolio['portfolio']->name;?></a></li>
+                        <li><a href="#tab-performance-portfolio-<?php echo $portfolio['portfolio']->id;?>"><?php echo $portfolio['portfolio']->name;?></a></li>
                         <?php 
                         }
                         ?>
@@ -143,33 +143,25 @@
 
                     <?php 
                     foreach ($templates['performance']['byPortfolio']['portfolios'] as $portfolio) {
-                        $shares = $portfolio['shares'];
+                        
                     ?>
                     <div id="tab-performance-portfolio-<?php echo $portfolio['portfolio']->id;?>">
-                        
                         <div class="tabs">
                             <ul>
-                                <li><a href="#tab-performance-portfolio-<?php echo $portfolio->id;?>-inprogress">In progress</a></li>
-                                <li><a href="#tab-performance-portfolio-<?php echo $portfolio->id;?>-finish">Finish</a></li>
-                                <li><a href="#tab-performance-portfolio-<?php echo $portfolio->id;?>-all">All</a></li>
+                                <li><a href="#tab-performance-portfolio-<?php echo $portfolio['portfolio']->id;?>-active">Active</a></li>
+                                <li><a href="#tab-performance-portfolio-<?php echo $portfolio['portfolio']->id;?>-notActive">Not active</a></li>
                             </ul>
                             
-                            <div id="tab-performance-portfolio-<?php echo $portfolio->id;?>-inprogress">
+                            <div id="tab-performance-portfolio-<?php echo $portfolio['portfolio']->id;?>-active">
                                 <?php
-                                $type = 'INPROGRESS';
-                                include __DIR__.'/portfolio.inc.html';
+                                $shares = $portfolio['shares']['active'];
+                                include __DIR__.'/portfolio-shares-active.inc.html';
                                 ?>
                             </div>
-                            <div id="tab-performance-portfolio-<?php echo $portfolio->id;?>-finish">
+                            <div id="tab-performance-portfolio-<?php echo $portfolio['portfolio']->id;?>-notActive">
                                 <?php
-                                $type = 'FINISH';
-                                include __DIR__.'/portfolio.inc.html';
-                                ?>
-                            </div>
-                            <div id="tab-performance-portfolio-<?php echo $portfolio->id;?>-all">
-                                <?php
-                                $type = 'ALL';
-                                include __DIR__.'/portfolio.inc.html';
+                                $shares = $portfolio['shares']['notActive'];
+                                include __DIR__.'/portfolio-shares-notactive.inc.html';
                                 ?>
                             </div>
                         </div>
@@ -218,11 +210,23 @@
             </div>
         </div>
         
-        
+        <pre>
+            @TODO : Transform all array in object
+            @TODO : Gestion d'une devise
+            @TODO : Gestion d'une couleur gain or loose
+            @TODO : Faire un total pour les actions finies d'un portfolio
+            @TODO : Performances -> Portfolio -> Active -> Set Current Unit Price : Search price
+            @TODO : Performances -> Portfolio -> Active -> Reload data
+            @TODO : Performances -> Portfolio -> Active -> Set total
+            @TODO : Performances -> Portfolio -> Set cash value
+            @TODO : Performances -> Portfolio -> Set total
+            @TODO : Performances -> Portfolio -> Active -> Set a benchmark value
+            @TODO : Performances -> Portfolio -> Set cash history value
+            @TODO : Performances -> Portfolio -> Not Active -> Set quantity, unit_price mine and all CAC40, history 
+            @TODO : Performances -> Portfolio -> Active -> Set quantity, unit_price mine and all CAC40, history 
+            @TODO : Performances -> Portfolio -> Set graph with benchmark
+        </pre>
 
-        @TODO : Cash sur portfolio
-        @TODO : Mettre un benchmark pour chaque portfolio
-        @TODO : Devise
         @Monnaie : Etherum / Bitcoin /Ripple
         @Information Ocfx / Coin checkup
         @Plateforme Kirachan / Bitstamp

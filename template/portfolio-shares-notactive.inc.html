@@ -1,0 +1,28 @@
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <th>Share</th>
+            <th>Dividend</th>
+            <th>Capital gain</th>
+            <th>Total</th>
+            <th>Return</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        foreach ($shares as $id_share => $share) {
+        ?>
+        <tr 
+            data-id_share="<?php echo $id_share; ?>"
+        >
+            <td><?php echo $share['share']->name; ?></td>
+            <td><?php echo $share['dividend']; ?></td>
+            <td><?php echo $share['capitalGain']; ?></td>
+            <td><?php echo $share['dividend'] + $share['capitalGain']; ?></td>
+            <td><?php echo round(($share['dividend'] + $share['capitalGain'])/$share['spend']*100, 2); ?> %</td>
+        </tr>
+        <?php 
+        }
+        ?>
+    </tbody>
+</table>
