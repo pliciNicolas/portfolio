@@ -72,7 +72,6 @@ class DashBoardController {
 		$this->tabs['historic'] = [];
 		$this->tabs['performance'] = [
 			'byPortfolio' => [
-				'total' => [],
 				'portfolios' => [
 					
 				]
