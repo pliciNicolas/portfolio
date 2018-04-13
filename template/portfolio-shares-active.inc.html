@@ -14,20 +14,60 @@
     </thead>
     <tbody>
         <?php 
-        foreach ($shares as $id_share => $share) {
+        foreach ($performance_portfolio->active_shares as $id_share => $share) {
         ?>
         <tr 
             data-id_share="<?php echo $id_share; ?>"
+            data-last_fee_fixed="<?php echo $share->last_fee_fixed; ?>"
+            data-last_fee_percent="<?php echo $share->last_fee_percent; ?>"
         >
-            <td><?php echo $share->share->name; ?></td>
-            <td><?php echo $share->totalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
-            <td><?php echo $share->quantity; ?></td>
-            <td><?php echo $share->unit_price. ' '.$performance_portfolio->portfolio->currency; ?></td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td></td>
+            <td>
+                <?php echo $share->share->name; ?>
+            </td>
+            <td
+                data-loose_gain="<?php echo (0<$share->totalGain?'gain':'loose'); ?>"
+            >
+                <?php echo $share->totalGain. ' '.$performance_portfolio->portfolio->currency; ?>
+            </td>
+            <td
+                data-quantity="<?php echo $share->quantity; ?>"
+            ><?php echo $share->quantity; ?>
+            </td>
+            <td
+                data-buying_unit_price="<?php echo $share->unit_price; ?>"
+                >
+                <?php echo $share->unit_price. ' '.$performance_portfolio->portfolio->currency; ?>
+            </td>
+            <td
+                data-current_unit_price="0"
+                >
+                <span class="current_unit_price">&nbsp;</span>
+                <?php echo $performance_portfolio->portfolio->currency; ?>
+            </td>
+            <td
+                data-virtual_gain_price="0"
+                >
+                <span class="virtual_gain_price">&nbsp;</span>
+                <?php echo $performance_portfolio->portfolio->currency; ?>
+            </td>
+            <td
+                data-virtual_gain_percent="0"
+                >
+                <span class="virtual_gain_percent">&nbsp;</span>
+                %
+            </td>
+            <td
+                data-gain_price="0"
+                >
+                <span class="gain_price">&nbsp;</span>
+                <?php echo $performance_portfolio->portfolio->currency; ?>
+            </td>
+            <td
+                data-gain_percent="0"
+                >
+                <span class="gain_percent">&nbsp;</span>
+                %
+            </td>
         </tr>
         <?php 
         }

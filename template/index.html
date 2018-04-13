@@ -25,29 +25,104 @@
 
         <script>
             $(function () {
+                // Enable tabs
                 $(".tabs").tabs();
-
-
-
-                $("#tabs-portfolios").tabs();
-                $("#tabs-shares").tabs();
                 $(".tablesorter").tablesorter();
             });
+            
+            
+            /**
+             * @author http://www.manasbhardwaj.net/get-unique-values-from-a-javascript-array-using-jquery/
+             * @param array index
+             * @returns array
+             */
+            function GetUnique(inputArray)
+            {
+                    var outputArray = [];
+                    for (var i = 0; i < inputArray.length; i++)
+                    {
+                            if ((jQuery.inArray(inputArray[i], outputArray)) == -1)
+                            {
+                                    outputArray.push(inputArray[i]);
+                            }
+                    }
+                    return outputArray;
+            }
 
 
             $(document).ready(function () {
+                
+                var debug = true;
+                
+                
+                // Get list of unique share
+                var share_symbol = [];
+                $("tr[data-id_share]").each(function () {
+                    share_symbol.push($(this).data('id_share'));
+                });
+                share_symbol = GetUnique(share_symbol);
+
+                if (debug) {
+                    console.log(share_symbol);
+                }
+
+
+                $(share_symbol).each(function (index, value) {
+                    if (debug) {
+                        console.log('Retrieve Share "'+value+'"');
+                    }
+                    
+                    var url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=DBG.PA&interval=1min&apikey=YCR6LSYJNTTISX2Y" + token;
+                    var jqxhr = $.ajax(url)
+                            .done(function (msg) {
+                                $(this).price = '';
+                                var tmp = msg["Time Series (1min)"];
+                                var current_price = null;
+                                for (var date in tmp) {
+                                    if (null == current_price) {
+                                        current_price = tmp[date]["4. close"];
+                                    }
+                                }
+
+
+                                $("tr[data-share_symbol='" + value + "'] ").each(function (item) {
+                                    $(this).find('td.current span').html(current_price);
+                                    var buying_price = parseFloat($(this).find('.buying_unit_price span').html());
+                                    var quantity = parseInt($(this).find('.quantity span').html());
+                                    var dividend = parseFloat($(this).find('.dividend span').html());
+                                    var last_fee_fixed = parseFloat($(this).find('.last_fee_fixed span').html());
+                                    var last_fee_percent = parseFloat($(this).find('.last_fee_percent span').html());
+                                    var return_cash = ((current_price - buying_price) * quantity) + dividend - last_fee_fixed - (last_fee_percent / 100 * quantity * buying_price);
+                                    var return_percent = return_cash / (buying_price * quantity) * 100;
+
+                                    $(this).find('.current span').text(current_price);
+                                    $(this).find('.return_cash span').text(Math.round((return_cash * 100)) / 100);
+                                    $(this).find('.return_percent span').text(Math.round((return_percent * 100)) / 100);
+                                    var gain_way = "positive";
+                                    if (return_cash < 0) {
+                                        gain_way = "negative";
+                                    }
+                                    $(this).find('.return_cash').attr('data-gain-way', gain_way);
+
+                                });
+                                console.log(current_price);
+
+                            })
+                            .fail(function (msg) {
+                                console.log(msg);
+                                alert("error");
+                            })
+                            .always(function (msg) {
+                                //console.log(msg);
+                                //alert( "complete");
+                            });
+                });
+
 
                 var token = "";
 
 
-                // Get list of unique share
-                var share_symbol = [];
-                var share_detail = {};
-                $("tr[data-share_symbol]").each(function () {
-                    share_detail.symbol = $(this).data('share_symbol');
-                    share_symbol.push(share_detail);
-                });
-                share_symbol = jQuery.unique(share_symbol);
+
 
 
                 //console.log(share_symbol);
@@ -155,7 +230,6 @@
                             
                             <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-active">
                                 <?php
-                                $shares = $performance_portfolio->active_shares;
                                 include __DIR__.'/portfolio-shares-active.inc.html';
                                 ?>
                             </div>
