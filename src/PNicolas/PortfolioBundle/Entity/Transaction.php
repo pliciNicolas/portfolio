@@ -60,4 +60,5 @@ class Transaction {
 			self::CASH,
 		];
 	}
+	
 }

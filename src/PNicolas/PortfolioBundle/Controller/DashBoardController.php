@@ -92,100 +92,12 @@ class DashBoardController {
 				}
 				
 				$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]->addTransaction($transaction);
-				
-				/*
-				if (!array_key_exists($transaction->share->id,$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'])) {
-					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id] = $this->getPerformancePortfolioShareLineSkeletton();
-					$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['share'] = $transaction->share;
-				}
-				
-				switch($transaction->type) {
-					case Transaction::BUY : 
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['spend'] += $transaction->price;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['unit_price'] = round(
-								(
-									$transaction->price 
-									+
-									(
-										$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['unit_price'] 
-										* 
-										$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['quantity']
-									)
-								) 
-								/ 
-								(
-									$transaction->quantity 
-									+ 
-									$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['quantity']
-								),2)
-								;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['quantity'] += $transaction->quantity;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['last_fee_fixed'] = $transaction->fee_fixed;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['last_fee_percent'] = $transaction->fee_percent;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['capitalGain'] -= $transaction->price;
-						break;
-					case Transaction::SELL : 
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['recieved'] += $transaction->price;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['quantity'] -= $transaction->quantity;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['last_fee_fixed'] = $transaction->fee_fixed;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['last_fee_percent'] = $transaction->fee_percent;
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['capitalGain'] += $transaction->price;
-						break;
-					case Transaction::DIVIDEND : 
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['shares']['all'][$transaction->share->id]['dividend'] += $transaction->unit_price;
-						break;
-					case Transaction::CASH : 
-						$this->tabs['performance']['byPortfolio']['portfolios'][$transaction->portfolio->id]['total']['cash'] += $transaction->unit_price;
-						break;
-				}
-				 * 
-				 */
 			}
 		}
 		
 		foreach($this->tabs['performance']['byPortfolio']['portfolios'] as &$portfolio) {
 			$portfolio->sortShares();
-//			foreach ($this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['all'] as $id_share => $share) {
-//				if ($share['quantity']) {
-//					$this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['active'][$id_share] = $share;
-//				} else {
-//					$this->tabs['performance']['byPortfolio']['portfolios'][$id_portfolio]['shares']['notActive'][$id_share] = $share;
-//				}
-//			}
 		}
-echo '<pre>';
-var_dump($this->tabs['performance']['byPortfolio']['portfolios']);
-die();
 	}
-	
-	
-	protected function getPerformancePortfolioSkeletton() {
-		return [
-			'total' => [
-				'cash' => 0
-			]
-			,'portfolio' => null
-			, 'shares' => [
-				'all'=> []
-				,'active' => []
-				,'notActive' => []
-				]
-		];
-	}
-	
-	
-	protected function getPerformancePortfolioShareLineSkeletton() {
-		return [
-			'spend' => 0
-			,'recieved' => 0
-			,'quantity' => 0
-			,'unit_price' => 0
-			,'dividend' => 0
-			,'last_fee_fixed' => 0
-			,'last_fee_percent' => 0
-			,'capitalGain' => 0
-			,'share' => null
-			
-		];
-	}
+
 }

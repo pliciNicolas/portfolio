@@ -1,0 +1,37 @@
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <th>Share</th>
+            <th>Dividend</th>
+            <th>Capital gain</th>
+            <th>Total</th>
+            <th>Return</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        foreach ($portfolio->inactive_shares['shares'] as $id_share => $share) {
+        ?>
+        <tr 
+            data-id_share="<?php echo $id_share; ?>"
+        >
+            <td><?php echo $share->share->name; ?></td>
+            <td><?php echo $share->dividend; ?></td>
+            <td><?php echo $share->capitalGain; ?></td>
+            <td><?php echo $share->totalGain; ?></td>
+            <td><?php echo $share->overAll?> %</td>
+        </tr>
+        <?php 
+        }
+        ?>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td>Total</td>
+            <td><?php echo $portfolio->inactive_shares['total']->dividend; ?></td>
+            <td><?php echo $portfolio->inactive_shares['total']->capitalGain; ?></td>
+            <td><?php echo $portfolio->inactive_shares['total']->totalGain; ?></td>
+            <td><?php echo $portfolio->inactive_shares['total']->overAll; ?> %</td>
+        </tr>
+    </tfoot>
+</table>
