@@ -61,7 +61,7 @@ class Performance_Portfolio {
 	
 	
 	public function sortShares() {
-		$this->inactive_shares['total'] = new Performance_Portfolio_Share();
+		$this->inactive_shares['total'] = new Performance_Portfolio_Share_Inactive();
 		foreach($this->all_shares as $id_share => $share) {
 			if ($share->quantity) {
 				$this->active_shares[$id_share] = $share;
@@ -73,7 +73,7 @@ class Performance_Portfolio {
 				$this->inactive_shares['total']->dividend += $inactive_share->dividend;
 				$this->inactive_shares['total']->capitalGain += $inactive_share->capitalGain;
 				$this->inactive_shares['total']->totalGain += $inactive_share->totalGain;
-				$this->inactive_shares['total']->overAll += round(($this->inactive_shares['total']->totalGain) / $this->inactive_shares['total']->spend*100, 2);
+				$this->inactive_shares['total']->overAll = round(($this->inactive_shares['total']->totalGain) / $this->inactive_shares['total']->spend*100, 2);
 			}
 		}
 	}

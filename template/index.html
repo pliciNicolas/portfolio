@@ -133,32 +133,32 @@
                 <div class="tabs">
                     <ul>
                         <?php 
-                        foreach ($templates['performance']['byPortfolio']['portfolios'] as $portfolio) {
+                        foreach ($templates['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
                         ?>
-                        <li><a href="#tab-performance-portfolio-<?php echo $portfolio->portfolio->id;?>"><?php echo $portfolio->portfolio->name;?></a></li>
+                        <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>"><?php echo $performance_portfolio->portfolio->name;?></a></li>
                         <?php 
                         }
                         ?>
                     </ul>
 
                     <?php 
-                    foreach ($templates['performance']['byPortfolio']['portfolios'] as $portfolio) {
+                    foreach ($templates['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
                         
                     ?>
-                    <div id="tab-performance-portfolio-<?php echo $portfolio->portfolio->id;?>">
+                    <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>">
                         <div class="tabs">
                             <ul>
-                                <li><a href="#tab-performance-portfolio-<?php echo $portfolio->portfolio->id;?>-active">Active</a></li>
-                                <li><a href="#tab-performance-portfolio-<?php echo $portfolio->portfolio->id;?>-inactive">Inactive</a></li>
+                                <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-active">Active</a></li>
+                                <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-inactive">Inactive</a></li>
                             </ul>
                             
-                            <div id="tab-performance-portfolio-<?php echo $portfolio->portfolio->id;?>-active">
+                            <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-active">
                                 <?php
-                                $shares = $portfolio->active_shares;
+                                $shares = $performance_portfolio->active_shares;
                                 include __DIR__.'/portfolio-shares-active.inc.html';
                                 ?>
                             </div>
-                            <div id="tab-performance-portfolio-<?php echo $portfolio->portfolio->id;?>-inactive">
+                            <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-inactive">
                                 <?php
                                 include __DIR__.'/portfolio-shares-inactive.inc.html';
                                 ?>
@@ -210,7 +210,6 @@
         </div>
         
         <pre>
-            @TODO : Gestion d'une devise
             @TODO : Gestion d'une couleur gain or loose
             @TODO : Performances -> Portfolio -> Active -> Set Current Unit Price : Search price
             @TODO : Performances -> Portfolio -> Active -> Reload data

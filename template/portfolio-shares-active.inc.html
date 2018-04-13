@@ -8,9 +8,9 @@
             <th>Quantity</th>
             <th>Buying Unit Price</th>
             <th>Current Unit Price</th>
-            <th>Virtual gain (€)</th>
+            <th>Virtual gain (<?php echo $performance_portfolio->portfolio->currency; ?>)</th>
             <th>Virtual gain (%)</th>
-            <th>Gain (Real + Virtual) (€)</th>
+            <th>Gain (Real + Virtual) (<?php echo $performance_portfolio->portfolio->currency; ?>)</th>
             <th>Gain (Real + Virtual) (%)</th>
         </tr>
     </thead>
@@ -22,11 +22,11 @@
             data-id_share="<?php echo $id_share; ?>"
         >
             <td><?php echo $share->share->name; ?></td>
-            <td><?php echo $share->dividend; ?></td>
-            <td><?php echo $share->capitalGain; ?></td>
-            <td><?php echo $share->totalGain; ?></td>
+            <td><?php echo $share->dividend. ' '.$performance_portfolio->portfolio->currency; ?></td>
+            <td><?php echo $share->capitalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
+            <td><?php echo $share->totalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
             <td><?php echo $share->quantity; ?></td>
-            <td><?php echo $share->unit_price; ?></td>
+            <td><?php echo $share->unit_price. ' '.$performance_portfolio->portfolio->currency; ?></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>

@@ -46,7 +46,7 @@ class DashBoardController {
 		
 		foreach($data['portfolio'] as $portfolio_item) {
 			$portfolio = new Portfolio();
-			$portfolio->set($portfolio_item['id'], $users[$portfolio_item['id_user']], $portfolio_item['name'], $portfolio_item['webservice'], $portfolio_item['webservice_token'], $shares[$portfolio_item['share_code_benchmark']]);
+			$portfolio->set($portfolio_item['id'], $users[$portfolio_item['id_user']], $portfolio_item['name'], $portfolio_item['currency'], $portfolio_item['webservice'], $portfolio_item['webservice_token'], $shares[$portfolio_item['share_code_benchmark']]);
 			$portfolios[$portfolio_item['id']] = $portfolio;
 		}
 		

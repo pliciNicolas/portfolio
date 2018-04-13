@@ -10,15 +10,15 @@
     </thead>
     <tbody>
         <?php 
-        foreach ($portfolio->inactive_shares['shares'] as $id_share => $share) {
+        foreach ($performance_portfolio->inactive_shares['shares'] as $id_share => $share) {
         ?>
         <tr 
             data-id_share="<?php echo $id_share; ?>"
         >
             <td><?php echo $share->share->name; ?></td>
-            <td><?php echo $share->dividend; ?></td>
-            <td><?php echo $share->capitalGain; ?></td>
-            <td><?php echo $share->totalGain; ?></td>
+            <td><?php echo $share->dividend. ' '.$performance_portfolio->portfolio->currency; ?></td>
+            <td><?php echo $share->capitalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
+            <td><?php echo $share->totalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
             <td><?php echo $share->overAll?> %</td>
         </tr>
         <?php 
@@ -28,10 +28,10 @@
     <tfoot>
         <tr>
             <td>Total</td>
-            <td><?php echo $portfolio->inactive_shares['total']->dividend; ?></td>
-            <td><?php echo $portfolio->inactive_shares['total']->capitalGain; ?></td>
-            <td><?php echo $portfolio->inactive_shares['total']->totalGain; ?></td>
-            <td><?php echo $portfolio->inactive_shares['total']->overAll; ?> %</td>
+            <td><?php echo $performance_portfolio->inactive_shares['total']->dividend. ' '.$performance_portfolio->portfolio->currency; ?></td>
+            <td><?php echo $performance_portfolio->inactive_shares['total']->capitalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
+            <td><?php echo $performance_portfolio->inactive_shares['total']->totalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
+            <td><?php echo $performance_portfolio->inactive_shares['total']->overAll; ?> %</td>
         </tr>
     </tfoot>
 </table>
