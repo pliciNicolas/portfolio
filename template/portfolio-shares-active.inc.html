@@ -2,9 +2,7 @@
     <thead>
         <tr>
             <th>Share</th>
-            <th>Dividend</th>
-            <th>Capital gain</th>
-            <th>Real Capital Gain</th>
+            <th>Capital Gain</th>
             <th>Quantity</th>
             <th>Buying Unit Price</th>
             <th>Current Unit Price</th>
@@ -22,8 +20,6 @@
             data-id_share="<?php echo $id_share; ?>"
         >
             <td><?php echo $share->share->name; ?></td>
-            <td><?php echo $share->dividend. ' '.$performance_portfolio->portfolio->currency; ?></td>
-            <td><?php echo $share->capitalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
             <td><?php echo $share->totalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
             <td><?php echo $share->quantity; ?></td>
             <td><?php echo $share->unit_price. ' '.$performance_portfolio->portfolio->currency; ?></td>

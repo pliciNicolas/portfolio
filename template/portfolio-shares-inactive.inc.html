@@ -14,6 +14,7 @@
         ?>
         <tr 
             data-id_share="<?php echo $id_share; ?>"
+            data-loose_gain="<?php echo (0<$share->totalGain?'gain':'loose'); ?>"
         >
             <td><?php echo $share->share->name; ?></td>
             <td><?php echo $share->dividend. ' '.$performance_portfolio->portfolio->currency; ?></td>
@@ -26,7 +27,9 @@
         ?>
     </tbody>
     <tfoot>
-        <tr>
+        <tr
+            data-loose_gain="<?php echo (0<$performance_portfolio->inactive_shares['total']->totalGain?'gain':'loose'); ?>"
+        >
             <td>Total</td>
             <td><?php echo $performance_portfolio->inactive_shares['total']->dividend. ' '.$performance_portfolio->portfolio->currency; ?></td>
             <td><?php echo $performance_portfolio->inactive_shares['total']->capitalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>

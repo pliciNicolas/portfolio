@@ -1,0 +1,14 @@
+[data-loose_gain="gain"] {
+    color: #008300;
+}
+[data-loose_gain="loose"] {
+    color: #ff0000;
+}
+
+tfoot {
+    font-weight: bold;
+    margin-top: 10px;
+}
+body .tablesorter-default tfoot tr td {
+    border-top: 1px #808080 dashed;
+}
