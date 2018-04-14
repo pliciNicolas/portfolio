@@ -5,7 +5,9 @@ $dashboard = new DashBoardController;
 
 try {
 	$dashboard->generate();
-	$templates = $dashboard->tabs;
+	$templates = [];
+	$templates['user'] = array_shift($dashboard->users);
+	$templates['dashboard'] = $dashboard->tabs;
 	include (__DIR__.'/template/index.html');
 	die();
 } catch (Exception $ex) {

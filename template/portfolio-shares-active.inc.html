@@ -17,15 +17,18 @@
         foreach ($performance_portfolio->active_shares as $id_share => $share) {
         ?>
         <tr 
-            data-id_share="<?php echo $id_share; ?>"
+            data-id_share="<?php echo Share_webservice::get($share->share, $templates['user']->webservice[1]->webservice); ?>"
+            data-id_webservice="<?php echo $templates['user']->webservice[1]->webservice->id; ?>"
             data-last_fee_fixed="<?php echo $share->last_fee_fixed; ?>"
             data-last_fee_percent="<?php echo $share->last_fee_percent; ?>"
+            class="active"
         >
             <td>
                 <?php echo $share->share->name; ?>
             </td>
             <td
                 data-loose_gain="<?php echo (0<$share->totalGain?'gain':'loose'); ?>"
+                data-totalGain="<?php echo $share->totalGain; ?>"
             >
                 <?php echo $share->totalGain. ' '.$performance_portfolio->portfolio->currency; ?>
             </td>

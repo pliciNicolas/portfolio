@@ -22,6 +22,10 @@
         <script src="asset/js/tablesorter-master/dist/js/jquery.tablesorter.min.js"></script>
         <script src="asset/js/tablesorter-master/dist/js/jquery.tablesorter.widgets.min.js"></script>
 
+        <!-- https://github.com/akquinet/jquery-toastmessage-plugin -->
+        <script src="asset/js/jquery-toastmessage-plugin/src/main/javascript/jquery.toastmessage.js"></script>
+        <link href="asset/js/jquery-toastmessage-plugin/src/main/resources/css/jquery.toastmessage.css" rel="stylesheet">
+        
 
         <script>
             $(function () {
@@ -51,13 +55,12 @@
 
 
             $(document).ready(function () {
-                
+
                 var debug = true;
-                
                 
                 // Get list of unique share
                 var share_symbol = [];
-                $("tr[data-id_share]").each(function () {
+                $("tr[data-id_share].active").each(function () {
                     share_symbol.push($(this).data('id_share'));
                 });
                 share_symbol = GetUnique(share_symbol);
@@ -67,12 +70,13 @@
                 }
 
 
-                $(share_symbol).each(function (index, value) {
+                var share_count = share_symbol.length;
+                $(share_symbol).each(function (index, symbol) {
                     if (debug) {
-                        console.log('Retrieve Share "'+value+'"');
+                        console.log('Retrieve Share "'+symbol+'"');
                     }
                     
-                    var url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=DBG.PA&interval=1min&apikey=YCR6LSYJNTTISX2Y" + token;
+                    var url = "<?php echo $templates['user']->webservice[1]->url; ?>".replace("@symbol@", symbol);
                     var jqxhr = $.ajax(url)
                             .done(function (msg) {
                                 $(this).price = '';
@@ -83,102 +87,81 @@
                                         current_price = tmp[date]["4. close"];
                                     }
                                 }
-
-
-                                $("tr[data-share_symbol='" + value + "'] ").each(function (item) {
-                                    $(this).find('td.current span').html(current_price);
-                                    var buying_price = parseFloat($(this).find('.buying_unit_price span').html());
-                                    var quantity = parseInt($(this).find('.quantity span').html());
-                                    var dividend = parseFloat($(this).find('.dividend span').html());
-                                    var last_fee_fixed = parseFloat($(this).find('.last_fee_fixed span').html());
-                                    var last_fee_percent = parseFloat($(this).find('.last_fee_percent span').html());
-                                    var return_cash = ((current_price - buying_price) * quantity) + dividend - last_fee_fixed - (last_fee_percent / 100 * quantity * buying_price);
-                                    var return_percent = return_cash / (buying_price * quantity) * 100;
-
-                                    $(this).find('.current span').text(current_price);
-                                    $(this).find('.return_cash span').text(Math.round((return_cash * 100)) / 100);
-                                    $(this).find('.return_percent span').text(Math.round((return_percent * 100)) / 100);
-                                    var gain_way = "positive";
-                                    if (return_cash < 0) {
-                                        gain_way = "negative";
-                                    }
-                                    $(this).find('.return_cash').attr('data-gain-way', gain_way);
-
-                                });
-                                console.log(current_price);
-
-                            })
-                            .fail(function (msg) {
-                                console.log(msg);
-                                alert("error");
-                            })
-                            .always(function (msg) {
-                                //console.log(msg);
-                                //alert( "complete");
-                            });
-                });
-
-
-                var token = "";
-
-
-
-
-
-                //console.log(share_symbol);
-
-                $(share_symbol).each(function (index, value) {
-                    return true
-                    var symbol = value.symbol;
-                    //https://www.alphavantage.co/documentation/
-                    var url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + symbol + "&interval=1min&apikey=YCR6LSYJNTTISX2Y" + token;
-
-                    var jqxhr = $.ajax(url)
-                            .done(function (msg) {
-                                $(this).price = '';
-                                var tmp = msg["Time Series (1min)"];
-                                var current_price = null;
-                                for (var date in tmp) {
-                                    if (null == current_price) {
-                                        current_price = tmp[date]["4. close"];
-                                    }
+                                
+                                if (debug) {
+                                    console.log(symbol + ' : ' + current_price);
                                 }
+                                
+                                if (null == current_price) {
+                                    $().toastmessage('showWarningToast', symbol + " price is null");
+                                } else {
+                                    $("tr[data-id_share='"+symbol+"'].active").each(function () {
+                                        $(this).find('td[data-current_unit_price]').data('current_unit_price', current_price);
+                                        $(this).find('td[data-current_unit_price] span.current_unit_price').html(current_price);
 
+                                        var buying_price = parseFloat($(this).find('[data-buying_unit_price]').data('buying_unit_price'));
+                                        var quantity = parseInt($(this).find('[data-quantity]').data('quantity'));
+                                        var last_fee_fixed = parseFloat($(this).data('last_fee_fixed'));
+                                        var last_fee_percent = parseFloat($(this).data('last_fee_percent'));
+                                        var virtual_gain = ((current_price - buying_price) * quantity) - last_fee_fixed - (last_fee_percent * quantity * buying_price);
+                                        var virtual_gain_percent = virtual_gain / (buying_price * quantity) * 100;
 
-                                $("tr[data-share_symbol='" + symbol + "'] ").each(function (item) {
-                                    $(this).find('td.current span').html(current_price);
-                                    var buying_price = parseFloat($(this).find('.buying_unit_price span').html());
-                                    var quantity = parseInt($(this).find('.quantity span').html());
-                                    var dividend = parseFloat($(this).find('.dividend span').html());
-                                    var last_fee_fixed = parseFloat($(this).find('.last_fee_fixed span').html());
-                                    var last_fee_percent = parseFloat($(this).find('.last_fee_percent span').html());
-                                    var return_cash = ((current_price - buying_price) * quantity) + dividend - last_fee_fixed - (last_fee_percent / 100 * quantity * buying_price);
-                                    var return_percent = return_cash / (buying_price * quantity) * 100;
+                                        var capitalGain = parseFloat($(this).find('[data-totalGain]').data('totalgain'));
+                                        var virtual_gain_loose_gain = 'gain';
+                                        if (virtual_gain<0) {
+                                            virtual_gain_loose_gain='loose';
+                                        }
+                                        $(this).find('td[data-virtual_gain_price] span.virtual_gain_price').html(Math.round((virtual_gain * 100) / 100));
+                                        $(this).find('td[data-virtual_gain_price]').data('virtual_gain_price', Math.round((virtual_gain * 100) / 100));
+                                        $(this).find('td[data-virtual_gain_price]').removeClass('gain loose');
+                                        $(this).find('td[data-virtual_gain_price]').addClass(virtual_gain_loose_gain);
 
-                                    $(this).find('.current span').text(current_price);
-                                    $(this).find('.return_cash span').text(Math.round((return_cash * 100)) / 100);
-                                    $(this).find('.return_percent span').text(Math.round((return_percent * 100)) / 100);
-                                    var gain_way = "positive";
-                                    if (return_cash < 0) {
-                                        gain_way = "negative";
-                                    }
-                                    $(this).find('.return_cash').attr('data-gain-way', gain_way);
+                                        $(this).find('td[data-virtual_gain_percent] span.virtual_gain_percent').html(Math.round((virtual_gain_percent * 100) / 100));
+                                        $(this).find('td[data-virtual_gain_percent]').data('virtual_gain_percent', Math.round((virtual_gain_percent * 100) / 100));
+                                        $(this).find('td[data-virtual_gain_percent]').removeClass('gain loose');
+                                        $(this).find('td[data-virtual_gain_percent]').addClass(virtual_gain_loose_gain);
+                                        
+                                        var gain = virtual_gain + capitalGain;
+                                        var gain_percent = gain / (buying_price * quantity) * 100;
+                                        var gain_loose_gain = 'gain';
+                                        if (gain<0) {
+                                            gain_loose_gain='loose';
+                                        }
+                                        $(this).find('td[data-gain_price] span.gain_price').html(Math.round((gain * 100) / 100));
+                                        $(this).find('td[data-gain_price]').data('gain_price', Math.round((gain * 100) / 100));
+                                        $(this).find('td[data-gain_price]').removeClass('gain loose');
+                                        $(this).find('td[data-gain_price]').addClass(gain_loose_gain);
+                                        
+                                        $(this).find('td[data-gain_percent] span.gain_percent').html(Math.round((gain_percent * 100) / 100));
+                                        $(this).find('td[data-gain_percent]').data('gain_percent', Math.round((gain_percent * 100) / 100));
+                                        $(this).find('td[data-gain_percent]').removeClass('gain loose');
+                                        $(this).find('td[data-gain_percent]').addClass(gain_loose_gain);
 
-                                });
-                                console.log(current_price);
+                                     });
+                                 }
+                                 
+                                 share_count--;
+                                 
+                                 if (0==share_count)  {
+                                     $().toastmessage('showSuccessToast', "Prices updated");
+                                 }
+                                
 
                             })
                             .fail(function (msg) {
+                                $().toastmessage('showErrorToast', "Error : "+msg);
                                 console.log(msg);
-                                alert("error");
                             })
                             .always(function (msg) {
                                 //console.log(msg);
                                 //alert( "complete");
                             });
                 });
+                
 
-//console.log(share_symbol);
+
+
+
 
                 while (1 == 2) {
                     setTimeout(
@@ -198,7 +181,7 @@
 
     </head>
     <body>
-
+        <h1>Bonjour <?php echo $templates['user']->name; ?></h1>
         <div class="tabs">
             <ul>
                 <li><a href="#tab-performances">Performances</a></li>
@@ -209,7 +192,7 @@
                 <div class="tabs">
                     <ul>
                         <?php 
-                        foreach ($templates['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
+                        foreach ($templates['dashboard']['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
                         ?>
                         <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>"><?php echo $performance_portfolio->portfolio->name;?></a></li>
                         <?php 
@@ -218,7 +201,7 @@
                     </ul>
 
                     <?php 
-                    foreach ($templates['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
+                    foreach ($templates['dashboard']['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
                         
                     ?>
                     <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>">
@@ -262,7 +245,7 @@
                     </thead>
                     <tbody>
                         <?php 
-                        foreach ($templates['historic'] as $transaction) {
+                        foreach ($templates['dashboard']['historic'] as $transaction) {
                         ?>
                         <tr 
                             data-id_share="<?php echo $transaction->share->id; ?>"
@@ -285,7 +268,6 @@
         </div>
         
         <pre>
-            @TODO : Performances -> Portfolio -> Active -> Set Current Unit Price : Search price
             @TODO : Performances -> Portfolio -> Active -> Reload data
             @TODO : Performances -> Portfolio -> Active -> Set total
             @TODO : Performances -> Portfolio -> Set cash value
@@ -296,79 +278,11 @@
             @TODO : Performances -> Portfolio -> Active -> Set quantity, unit_price mine and all CAC40, history 
             @TODO : Performances -> Portfolio -> Set graph with benchmark
             @TODO : Order and align table
+            @TODO : Rebuild webservice management 
         </pre>
 
         @Monnaie : Etherum / Bitcoin /Ripple
         @Information Ocfx / Coin checkup
         @Plateforme Kirachan / Bitstamp
-        <div id="tabs-portfolios">
-            <ul>
-                <li><a href="#tabs-performance">Performances</a></li>
-                <li><a href="#tabs-historic">Historic</a></li>
-                <li><a href="#tabs-detail">Detail</a></li>
-                <li><a href="#tabs-share">Share</a></li>
-            </ul>
-            <div id="tabs-performance">
-                <!-- Foreach portfolio -->
-                <div class="portfolio">
-                    <div class="title">
-                        Portfolio n°1
-                    </div>
-                    <div class="shares">
-                        <table class="tablesorter">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Code</th>
-                                    <th>Buying unit price</th>
-                                    <th>Quantity</th>
-                                    <th>Dividend</th>
-                                    <th>Current</th>
-                                    <th>Return (EUR)</th>
-                                    <th>Return (%)</th>
-                                    <th>Last Fee fixed</th>
-                                    <th>Last Fee percent</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Foreach share -->
-                                <tr data-share_symbol='DBG.PA'>
-                                    <td>Dérichebourg</td>
-                                    <td>DBG.PA</td>
-                                    <td class='buying_unit_price'><span>1.894</span> €</td>
-                                    <td class='quantity'><span>100</span></td>
-                                    <td class='dividend'><span>0</span></td>
-                                    <td class='current'><span></span> €</td>
-                                    <td class='return_cash' data-gain-way=''><span></span> €</td>
-                                    <td class='return_percent' data-gain-way=''><span></span> %</td>
-                                    <td class='last_fee_fixed'><span>8</span> €</td>
-                                    <td class='last_fee_percent'><span>0</span> %</td>
-                                </tr>
-                                <!-- Foreach /share -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <!-- /Foreach -->
-            </div>
-            <div id="tabs-historic">
-                Historique
-            </div>
-            <div id="tabs-detail">
-                Détails
-            </div>
-            <div id="tabs-share">
-                <div id="shares">
-                    <ul>
-                        <li><a href="#tabs-share-gle">GLE - Société Générale</a></li>
-                        <div id="tabs-share-GLE">
-                            Détails de l'action
-                        </div>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-
     </body>
 </html>

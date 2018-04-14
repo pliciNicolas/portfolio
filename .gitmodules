@@ -1,0 +1,3 @@
+[submodule "asset/js/jquery-toastmessage-plugin"]
+	path = asset/js/jquery-toastmessage-plugin
+	url = https://github.com/akquinet/jquery-toastmessage-plugin.git

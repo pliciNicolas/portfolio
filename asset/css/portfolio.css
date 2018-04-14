@@ -1,7 +1,7 @@
-[data-loose_gain="gain"] {
+[data-loose_gain="gain"], .gain {
     color: #008300;
 }
-[data-loose_gain="loose"] {
+[data-loose_gain="loose"], .loose {
     color: #ff0000;
 }
 
