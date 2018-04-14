@@ -52,6 +52,49 @@
                     }
                     return outputArray;
             }
+            
+            function reloadPortfolioTotal(table) {
+                var spend = 0;
+                var total_virtual_gain_price = 0;
+                var total_virtual_gain_percent = 0;
+                var total_gain_price = 0;
+                var total_gain_percent = 0;
+                table.find('tbody tr').each(function(index, tr){
+                    spend += $(tr).find('td[data-buying_unit_price]').data('buying_unit_price') * $(tr).find('td[data-quantity]').data('quantity');
+                    total_virtual_gain_price += $(tr).find('td[data-virtual_gain_price]').data('virtual_gain_price');
+                    total_gain_price += $(tr).find('td[data-gain_price]').data('gain_price');
+                });
+                total_virtual_gain_percent = total_virtual_gain_price / spend * 100;
+                total_gain_percent = total_gain_price / spend * 100;
+                
+                var virtual_gain_loose_gain = 'gain';
+                    if (total_virtual_gain_percent<0) {
+                        virtual_gain_loose_gain='loose';
+                }
+                var gain_loose_gain = 'gain';
+                    if (total_gain_percent<0) {
+                        gain_loose_gain='loose';
+                }
+                table.find('td[data-total_virtual_gain_price]').data('total_virtual_gain_price', Math.round((total_virtual_gain_price * 100) / 100));
+                table.find('tfoot span.total_virtual_gain_price').html(total_virtual_gain_price);
+                table.find('tfoot td[data-total_virtual_gain_price]').removeClass('gain loose');
+                table.find('tfoot td[data-total_virtual_gain_price]').addClass(virtual_gain_loose_gain);
+                
+                table.find('td[data-total_virtual_gain_percent]').data('total_virtual_gain_percent', Math.round((total_virtual_gain_percent * 100) / 100));
+                table.find('tfoot span.total_virtual_gain_percent').html(Math.round((total_virtual_gain_percent * 100) / 100));
+                table.find('tfoot td[data-total_virtual_gain_percent]').removeClass('gain loose');
+                table.find('tfoot td[data-total_virtual_gain_percent]').addClass(virtual_gain_loose_gain);
+                
+                table.find('td[data-total_gain_price]').data('total_gain_price', Math.round((total_gain_price * 100) / 100));
+                table.find('tfoot span.total_gain_price').html(total_gain_price);
+                table.find('tfoot td[data-total_gain_price]').removeClass('gain loose');
+                table.find('tfoot td[data-total_gain_price]').addClass(gain_loose_gain);
+                
+                table.find('td[data-total_gain_percent]').data('total_gain_percent', Math.round((total_gain_percent * 100) / 100));
+                table.find('tfoot span.total_gain_percent').html(Math.round((total_gain_percent * 100) / 100));
+                table.find('tfoot td[data-total_gain_percent]').removeClass('gain loose');
+                table.find('tfoot td[data-total_gain_percent]').addClass(gain_loose_gain);
+            }
 
 
             $(document).ready(function () {
@@ -136,6 +179,8 @@
                                         $(this).find('td[data-gain_percent]').data('gain_percent', Math.round((gain_percent * 100) / 100));
                                         $(this).find('td[data-gain_percent]').removeClass('gain loose');
                                         $(this).find('td[data-gain_percent]').addClass(gain_loose_gain);
+                                        
+                                        reloadPortfolioTotal($(this).parents('table'));
 
                                      });
                                  }
@@ -279,6 +324,7 @@
             @TODO : Performances -> Portfolio -> Set graph with benchmark
             @TODO : Order and align table
             @TODO : Rebuild webservice management 
+            @TODO : Replace last fee by fee
         </pre>
 
         @Monnaie : Etherum / Bitcoin /Ripple

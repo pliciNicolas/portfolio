@@ -6,7 +6,7 @@ class Performance_Portfolio {
 	protected $all_shares = [];
 	
 	public $portfolio = null;
-	public $active_shares = [];
+	public $active_shares =  ['share' => [], 'total' => null];
 	public $inactive_shares = ['share' => [], 'total' => null];
 	public $total = ['cash' => 0];
 	
@@ -61,10 +61,18 @@ class Performance_Portfolio {
 	
 	
 	public function sortShares() {
+		$this->active_shares['total'] = new Performance_Portfolio_Share();
 		$this->inactive_shares['total'] = new Performance_Portfolio_Share_Inactive();
 		foreach($this->all_shares as $id_share => $share) {
 			if ($share->quantity) {
-				$this->active_shares[$id_share] = $share;
+				$this->active_shares['shares'][$id_share] = $share;
+				$this->active_shares['total']->spend += $share->spend;
+				$this->active_shares['total']->recieved += $share->recieved;
+				$this->active_shares['total']->dividend += $share->dividend;
+				$this->active_shares['total']->capitalGain += $share->capitalGain;
+				$this->active_shares['total']->totalGain += $share->totalGain;
+				$this->active_shares['total']->last_fee_fixed = $share->last_fee_fixed;
+				$this->active_shares['total']->last_fee_percent = $share->last_fee_percent;
 			} else {
 				$inactive_share = new Performance_Portfolio_Share_Inactive();
 				$inactive_share->set($share);

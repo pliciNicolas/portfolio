@@ -14,7 +14,7 @@
     </thead>
     <tbody>
         <?php 
-        foreach ($performance_portfolio->active_shares as $id_share => $share) {
+        foreach ($performance_portfolio->active_shares['shares'] as $id_share => $share) {
         ?>
         <tr 
             data-id_share="<?php echo Share_webservice::get($share->share, $templates['user']->webservice[1]->webservice); ?>"
@@ -76,4 +76,37 @@
         }
         ?>
     </tbody>
+    <tfoot>
+        <tr>
+            <td>Total</td>
+            <td><?php echo $performance_portfolio->active_shares['total']->totalGain. ' '.$performance_portfolio->portfolio->currency; ?></td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td
+                data-total_virtual_gain_price="0"
+            >
+                <span class="total_virtual_gain_price">&nbsp;</span>
+                <?php echo $performance_portfolio->portfolio->currency; ?>
+            </td>
+            <td
+                data-total_virtual_gain_percent="0"
+            >
+                <span class="total_virtual_gain_percent">&nbsp;</span>
+                %
+            </td>
+            <td
+                data-total_gain_price="0"
+            >
+                <span class="total_gain_price">&nbsp;</span>
+                <?php echo $performance_portfolio->portfolio->currency; ?>
+            </td>
+            <td
+                data-total_gain_percent="0"
+            >
+                <span class="total_gain_percent">&nbsp;</span>
+                %
+            </td>
+        </tr>
+    </tfoot>
 </table>
