@@ -59,7 +59,7 @@ class DashBoardController {
 		
 		foreach($data['share'] as $share_item) {
 			$share = new Share();
-			$share->set($share_item['id'],$share_item['name']);
+			$share->set($share_item['id'],$share_item['name'], $share_item['open_market']);
 			$shares[$share_item['id']] = $share;
 		}
 		

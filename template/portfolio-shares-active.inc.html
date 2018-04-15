@@ -18,6 +18,7 @@
         ?>
         <tr 
             data-id_share="<?php echo Share_webservice::get($share->share, $templates['user']->webservice[1]->webservice); ?>"
+            data-share_openmarket="<?php echo $share->share->open_market; ?>"
             data-id_webservice="<?php echo $templates['user']->webservice[1]->webservice->id; ?>"
             data-last_fee_fixed="<?php echo $share->last_fee_fixed; ?>"
             data-last_fee_percent="<?php echo $share->last_fee_percent; ?>"
