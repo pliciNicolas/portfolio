@@ -20,9 +20,6 @@ class Transaction {
 	public $fee_fixed = null;
 	public $fee_percent = null;
 	
-	public $fee = null;
-	public $price = null;
-	
 
 	/**
 	 * Set object
@@ -51,13 +48,6 @@ class Transaction {
 		$this->unit_price = (float) $unit_price;
 		$this->fee_fixed = (float) $fee_fixed;
 		$this->fee_percent = (float) $fee_percent;
-		
-		$this->fee = $this->fee_fixed + round($this->fee_percent * $this->quantity * $this->unit_price, 2);
-		
-		$this->price = ($this->unit_price * $this->quantity) - $this->fee;
-		if (self::BUY == $this->type) {
-			$this->price = ($this->unit_price * $this->quantity) + $this->fee;
-		}
 	}
 
 	/**

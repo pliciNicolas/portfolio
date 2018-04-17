@@ -23,67 +23,34 @@ class User_Share_Detail {
 		}
 		
 		switch($type) {
-//			case Transaction::TYPE_BUY : 
-//				$this->all_shares[$transaction->share->id]->spend += $transaction->price;
-//				$this->all_shares[$transaction->share->id]->unit_price = round(
-//						(
-//							$transaction->price 
-//							+
-//							(
-//								$this->all_shares[$transaction->share->id]->unit_price 
-//								* 
-//								$this->all_shares[$transaction->share->id]->quantity
-//							)
-//						) 
-//						/ 
-//						(
-//							$transaction->quantity 
-//							+ 
-//							$this->all_shares[$transaction->share->id]->quantity
-//						),2)
-//						;
-//				$this->all_shares[$transaction->share->id]->quantity += $transaction->quantity;
-//				$this->all_shares[$transaction->share->id]->last_fee_fixed = $transaction->fee_fixed;
-//				$this->all_shares[$transaction->share->id]->last_fee_percent = $transaction->fee_percent;
-//				break;
+			case Transaction::TYPE_BUY : 
+				
+				// Portfolio
+				$this->portfolios[$portfolio->id]->addBuy($unit_price, $quantity, $fee_fixed, $fee_percent);
+				
+				// Total
+				$this->total->addBuy($unit_price, $quantity, $fee_fixed, $fee_percent);
+
+				break;
+
 			case Transaction::TYPE_SELL : 
 				// Portfolio
+				$this->portfolios[$portfolio->id]->addSell($unit_price, $quantity, $fee_fixed, $fee_percent);
 				
 				// Total
-				
-//				$this->all_shares[$transaction->share->id]->recieved += $transaction->price;
-//				$this->all_shares[$transaction->share->id]->quantity -= $transaction->quantity;
-//				$this->all_shares[$transaction->share->id]->last_fee_fixed = $transaction->fee_fixed;
-//				$this->all_shares[$transaction->share->id]->last_fee_percent = $transaction->fee_percent;
-//				$this->all_shares[$transaction->share->id]->capitalGain += ($transaction->unit_price - $this->all_shares[$transaction->share->id]->unit_price) * $transaction->quantity - $transaction->fee;
+				$this->total->addSell($unit_price, $quantity, $fee_fixed, $fee_percent);
+
 				break;
-//public $share = null;
-//public $spend = 0;
-//public $recieved = 0;
-//public $quantity = 0;
-//public $unit_price = 0;
-//public $dividend_price = 0;
-//public $dividend_count = 0;
-//public $dividend_average = 0;
-//public $dividend_percent = 0;
-//public $capitalGain_price = 0;
-//public $capitalGain_percent = 0;
-//public $gain_price = 0;
-//public $gain_percent = 0;
+
 			case Transaction::TYPE_DIVIDEND : 
+				$dividend = $unit_price * $quantity;
+				
 				// Portfolio
-				$this->portfolios[$portfolio->id]->dividend_price += $unit_price * $quantity;
-				$this->portfolios[$portfolio->id]->dividend_count += 1;
-				$this->portfolios[$portfolio->id]->dividend_average = $this->total->dividend_price / $this->total->dividend_count;
-				$this->portfolios[$portfolio->id]->gain_price = $this->total->dividend_price + $this->total->capitalGain_price;
-				$this->portfolios[$portfolio->id]->gain_percent = $this->total->gain_price / $this->total_spend;
+				$this->portfolios[$portfolio->id]->addDividend($dividend);
 
 				// Total
-				$this->total->dividend_price += $unit_price * $quantity;
-				$this->total->dividend_count += 1;
-				$this->total->dividend_average = $this->total->dividend_price / $this->total->dividend_count;
-				$this->total->gain_price = $this->total->dividend_price + $this->total->capitalGain_price;
-				$this->total->gain_percent = $this->total->gain_price / $this->total_spend;
+				$this->total->addDividend($dividend);
+
 				break;
 		}
 	}
