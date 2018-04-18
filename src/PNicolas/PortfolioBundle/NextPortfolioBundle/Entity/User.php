@@ -6,6 +6,8 @@
 class User {
 	public $id = null;
 	public $name = null;
+        
+        public $webservices = [];
 	
 	/**
 	 * Set object
@@ -16,4 +18,8 @@ class User {
 		$this->id = $id;
 		$this->name = $name;
 	}
+        
+        public function addWebservice(\Webservice $webservice, \User_Webservice $user_webservice) {
+            $this->webservices[$webservice->id] = ['webservice' => $webservice, 'user_webservice' => $user_webservice];
+        }
 }
