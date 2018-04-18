@@ -44,7 +44,7 @@ class User_Share {
 		
 		$this->recieved += $price;
 		$this->quantity -= $quantity;
-		$this->capitalGain_price += ($unit_price - $this->unit_price) * quantity - $fee; 
+		$this->capitalGain_price += ($unit_price - $this->unit_price) * $quantity - $fee; 
 		$this->capitalGain_percent = $this->capitalGain_price / ($this->unit_price * $this->quantity); 
 		$this->updateGain();
 	}
