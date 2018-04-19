@@ -58,6 +58,6 @@ class Transaction {
 		$oClass = new ReflectionClass(__CLASS__);
 		$const = $oClass->getConstants();
 
-		return array_keys($const);
+		return array_values($const);
 	}
 }
