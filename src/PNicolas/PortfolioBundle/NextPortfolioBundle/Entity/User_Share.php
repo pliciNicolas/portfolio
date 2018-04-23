@@ -6,87 +6,55 @@
  */
 class User_Share {
 	public $share = null;
-	public $spend = 0;
-	public $recieved = 0;
-	public $quantity = 0;
-	public $unit_price = 0;
-	public $dividend_price = 0;
-	public $dividend_count = 0;
-	public $dividend_average = 0;
-	public $dividend_percent = 0;
-	public $capitalGain_price = 0;
-	public $capitalGain_percent = 0;
-	public $gain_price = 0;
-	public $gain_percent = 0;
+	public $portfolios = [];
+	public $total = null;
 	
-	/**
-	 * Add a dividend operation
-	 * @param float $dividend
-	 */
-	public function addDividend($dividend) {
-		$this->dividend_price += $dividend;
-		$this->dividend_count += 1;
-		$this->dividend_average = $this->dividend_price / $this->dividend_count;
-		$this->updateGain();
+	public function addTransaction(\Transaction $transaction) {
+		$this->addTransactionData($transaction->portfolio, $transaction->share, $transaction->type, $transaction->quantity, $transaction->unit_price, $transaction->fee_fixed, $transaction->fee_percent);
 	}
+	
+	public function addTransactionData(\Portfolio $portfolio, \Share $share, $type, $quantity, $unit_price, $fee_fixed, $fee_percent) {
+		if (is_null($this->total)) {
+			$this->total = new User_Share_Line();
+		}
+		
+		$this->share = $share;
+		
+		if (!array_key_exists($portfolio->id, $this->portfolios)) {
+			$this->portfolios[$portfolio->id] = new User_Share_Line();
+			$this->portfolios[$portfolio->id]->share = $share;
+		}
+		
+		switch($type) {
+			case Transaction::TYPE_BUY : 
+				
+				// Portfolio
+				$this->portfolios[$portfolio->id]->addBuy($unit_price, $quantity, $fee_fixed, $fee_percent);
+				
+				// Total
+				$this->total->addBuy($unit_price, $quantity, $fee_fixed, $fee_percent);
 
-	/**
-	 * Add sell operation
-	 * @param float $unit_price
-	 * @param int $quantity
-	 * @param float $fee_fixed
-	 * @param float $fee_percent
-	 */
-	public function addSell($unit_price, $quantity, $fee_fixed, $fee_percent) {
-		
-		$fee = $fee_fixed + round($fee_percent * $quantity * $unit_price, 2);
-		$price = ($unit_price * $quantity) - $fee;
-		
-		$this->recieved += $price;
-		$this->quantity -= $quantity;
-		$this->capitalGain_price += ($unit_price - $this->unit_price) * $quantity - $fee; 
-		$this->capitalGain_percent = $this->capitalGain_price / ($this->unit_price * $this->quantity); 
-		$this->updateGain();
-	}
-	
-	/**
-	 * Add buy operation
-	 * @param float $unit_price
-	 * @param int $quantity
-	 * @param float $fee_fixed
-	 * @param float $fee_percent
-	 */
-	public function addBuy($unit_price, $quantity, $fee_fixed, $fee_percent) {
-		
-		$fee = $fee_fixed + round($fee_percent * $quantity * $unit_price, 2);
-		$price = ($unit_price * $quantity) - $fee;
-		
-		$this->spend += $price;
-		$this->unit_price = round(
-						(
-							$price 
-							+
-							(
-								$this->unit_price 
-								* 
-								$this->quantity
-							)
-						) 
-						/ 
-						(
-							$quantity
-							+ 
-							$this->quantity
-						),2)
-		;
-		$this->quantity += $quantity;
-	}
-	
-	/**
-	 * Update gain values
-	 */
-	protected function updateGain() {
-		$this->gain_price = $this->dividend_price + $this->capitalGain_price;
-		$this->gain_percent = $this->gain_price / ($this->unit_price * $this->quantity);
+				break;
+
+			case Transaction::TYPE_SELL : 
+				// Portfolio
+				$this->portfolios[$portfolio->id]->addSell($unit_price, $quantity, $fee_fixed, $fee_percent);
+				
+				// Total
+				$this->total->addSell($unit_price, $quantity, $fee_fixed, $fee_percent);
+
+				break;
+
+			case Transaction::TYPE_DIVIDEND : 
+				$dividend = $unit_price * $quantity;
+				
+				// Portfolio
+				$this->portfolios[$portfolio->id]->addDividend($dividend);
+
+				// Total
+				$this->total->addDividend($dividend);
+
+				break;
+		}
 	}
 }
