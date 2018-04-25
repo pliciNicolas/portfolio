@@ -1,0 +1,58 @@
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <td>&nbsp;</td>
+            <td colspan="3">Dividend</td>
+        </tr>
+        <tr>
+            <th>Portfolio</th>
+            <th>Dividend (<?php echo $user_share_line->portfolio->currency; ?>)</th>
+            <th>Dividend count</th>
+            <th>Dividend average</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        foreach ($user_share->portfolios as $id_portfolio => $user_share_line) {
+        ?>
+        <tr 
+            data-id_share="<?php echo $user_share->share->id; ?>"
+            data-share_symbol="<?php echo $user_share->share->symbol; ?>"
+            data-id_portfolio="<?php echo $user_share_line->portfolio->id; ?>"
+        >
+            <td class="portfolio_name">
+                <?php echo $user_share_line->portfolio->name; ?>
+            </td>
+            <td class="dividend_amount">
+                <?php echo $user_share_line->dividend_price; ?>
+                <?php echo $user_share_line->portfolio->currency; ?>
+            </td>
+            <td class="dividend_count">
+                <?php echo $user_share_line->dividend_count; ?>
+            </td>
+            <td class="dividend_average">
+                <?php echo $user_share_line->dividend_average; ?>
+                <?php echo $user_share_line->portfolio->currency; ?>
+            </td>
+        </tr>
+        <?php 
+        }
+        ?>
+    </tbody>
+    <tfoot>
+        <td class='total'>
+            Total
+        </td>
+        <td class='dividend_amount'>
+            <?php echo $user_share->total->dividend_price; ?>
+            <?php echo $user_share_line->portfolio->currency; ?>
+        </td>
+        <td class='dividend_count'>
+            <?php echo $user_share->total->dividend_count; ?>
+        </td>
+            <td class="dividend_average">
+                <?php echo $user_share->total->dividend_average; ?>
+                <?php echo $user_share_line->portfolio->currency; ?>
+            </td>
+    </tfoot>
+</table>
