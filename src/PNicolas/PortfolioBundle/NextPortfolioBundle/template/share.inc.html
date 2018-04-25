@@ -2,13 +2,23 @@
     <thead>
         <tr>
             <td>&nbsp;</td>
-            <td colspan="3">Dividend</td>
+            <td colspan="5">Dividend</td>
+			<td colspan="2">Capital gain</td>
         </tr>
         <tr>
             <th>Portfolio</th>
             <th>Dividend (<?php echo $user_share_line->portfolio->currency; ?>)</th>
             <th>Dividend count</th>
             <th>Dividend average</th>
+			<th>Dividend Overall</th>
+			<th>Dividend per share</th>
+			<th>Gain</th>
+			<th>Gain overall</th>
+			<th>Transaction count</th>
+			<th>Balance</th>
+			<th>Buying unit price</th>
+			<th>Quantity</th>
+			<th>Capital</th>
         </tr>
     </thead>
     <tbody>
@@ -34,6 +44,17 @@
                 <?php echo $user_share_line->dividend_average; ?>
                 <?php echo $user_share_line->portfolio->currency; ?>
             </td>
+			<td class="dividend_overall">
+				???? %
+			</td>
+			<td class="dividend_unit">
+				????
+				<?php echo $user_share_line->portfolio->currency; ?>
+			</td>
+			<td class="capital_gain">
+				????
+				<?php echo $user_share_line->portfolio->currency; ?>
+			</td>
         </tr>
         <?php 
         }
@@ -50,9 +71,20 @@
         <td class='dividend_count'>
             <?php echo $user_share->total->dividend_count; ?>
         </td>
-            <td class="dividend_average">
-                <?php echo $user_share->total->dividend_average; ?>
-                <?php echo $user_share_line->portfolio->currency; ?>
-            </td>
+		<td class="dividend_average">
+			<?php echo $user_share->total->dividend_average; ?>
+			<?php echo $user_share_line->portfolio->currency; ?>
+		</td>
+		<td class="dividend_overall">
+			???? %
+		</td>
+		<td class="dividend_unit">
+			????
+			<?php echo $user_share_line->portfolio->currency; ?>
+		</td>
+		<td class="capital_gain">
+			????
+			<?php echo $user_share_line->portfolio->currency; ?>
+		</td>
     </tfoot>
 </table>
