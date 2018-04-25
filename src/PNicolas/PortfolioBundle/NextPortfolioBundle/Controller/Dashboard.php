@@ -67,7 +67,7 @@ class Dashboard {
 			throw new Exception('Cant find share_webservice in data file');
 		}
 		foreach($data['share_webservice'] as $share_webservice_item) {
-			Share_Webservice::set($share_webservice_item['id_webservice'], $share_webservice_item['id_share'], $share_webservice_item['symbol']);
+			Share_Webservice::set($share_webservice_item['id_share'], $share_webservice_item['id_webservice'], $share_webservice_item['symbol']);
 		}
 		
 		

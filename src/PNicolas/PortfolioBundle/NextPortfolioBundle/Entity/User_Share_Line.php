@@ -5,16 +5,28 @@
  *
  */
 class User_Share_Line {
+	
+	public $share = null;
+	public $portfolio = null;
+	
 	public $spend = 0;
 	public $recieved = 0;
+	public $balance = 0;
 	public $quantity = 0;
 	public $unit_price = 0;
+	public $capital = 0;
+	
+	// Dividend
 	public $dividend_price = 0;
 	public $dividend_count = 0;
 	public $dividend_average = 0;
 	public $dividend_percent = 0;
+	
+	// Capital Gain
 	public $capitalGain_price = 0;
 	public $capitalGain_percent = 0;
+	
+	// Balance
 	public $gain_price = 0;
 	public $gain_percent = 0;
 	
@@ -25,7 +37,9 @@ class User_Share_Line {
 	public function addDividend($dividend) {
 		$this->dividend_price += $dividend;
 		$this->dividend_count += 1;
-		$this->dividend_average = $this->dividend_price / $this->dividend_count;
+		$this->dividend_average = round($this->dividend_price / $this->dividend_count,2);
+		
+		$this->recieved += $dividend;
 		$this->updateGain();
 	}
 
@@ -47,6 +61,9 @@ class User_Share_Line {
 		if ($this->unit_price && $this->quantity) {
 			$this->capitalGain_percent = $this->capitalGain_price / ($this->unit_price * $this->quantity); 
 		}
+		
+		$this->capital = $this->unit_price * $this->quantity;
+		
 		$this->updateGain();
 	}
 	
@@ -81,6 +98,8 @@ class User_Share_Line {
 						),2)
 		;
 		$this->quantity += $quantity;
+		
+		$this->capital = $this->unit_price * $this->quantity;
 	}
 	
 	/**
@@ -91,5 +110,7 @@ class User_Share_Line {
 		if ($this->unit_price && $this->quantity) {
 			$this->gain_percent = $this->gain_price / ($this->unit_price * $this->quantity);
 		}
+		
+		$this->balance = $this->recieved - $this->spend;
 	}
 }

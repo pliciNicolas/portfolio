@@ -235,60 +235,42 @@
         <h1>Bonjour <?php echo $templateVar['user']->name; ?></h1>
         <div class="tabs">
             <ul>
-                <li><a href="#tab-resume">Resume</a></li>
-                <li><a href="#tab-performances">Performances</a></li>
+                <li><a href="#tab-shares">Shares</a></li>
                 <li><a href="#tab-historic">Historic</a></li>
             </ul>
 
-            <div id="tab-resume">
+            <div id="tab-shares" class='tabs'>
                 <?php
-                //include __DIR__.'/resume.inc.html';
+                
+                // Order shares by name
+                $share_by_name = [];
+                foreach($templateVar['user']->shares as $user_share) {
+                    $share_by_name[$user_share->share->name] = $user_share;
+                }
+                ksort($share_by_name);
+                
                 ?>
-            </div>
-            <div id="tab-performances">
-                <div class="tabs">
-                    <ul>
-                        <?php 
-                        /*
-                        foreach ($templates['dashboard']['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
-                        ?>
-                        <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>"><?php echo $performance_portfolio->portfolio->name;?></a></li>
-                        <?php 
-                        }
-                        */
-                        ?>
-                    </ul>
-
+                <ul>
                     <?php 
-                    /*
-                    foreach ($templates['dashboard']['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
-                        
+                    foreach($share_by_name as $name => $user_share) {
                     ?>
-                    <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>">
-                        <div class="tabs">
-                            <ul>
-                                <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-active">Active</a></li>
-                                <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-inactive">Inactive</a></li>
-                            </ul>
-                            
-                            <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-active">
-                                <?php
-                                //include __DIR__.'/portfolio-shares-active.inc.html';
-                                ?>
-                            </div>
-                            <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-inactive">
-                                <?php
-                                //include __DIR__.'/portfolio-shares-inactive.inc.html';
-                                ?>
-                            </div>
-                        </div>
-                    </div>
+                    <li><a href="#tab-share-<?php echo $user_share->share->id;?>"><?php echo $name.($user_share->isActive()?' *':'');?></a></li>
                     <?php 
                     }
-                    */
+                    ?>
+                </ul>
+
+                <?php 
+                foreach($share_by_name as $name => $user_share) {
+                ?>
+                <div id="tab-share-<?php echo $user_share->share->id;?>" class="share <?php echo $name.($user_share->isActive()?'active':'inactive');?>" >
+                    <?php
+                    include __DIR__.'/share.inc.html';
                     ?>
                 </div>
-                        
+                <?php 
+                }
+                ?>
             </div>
             <div id="tab-historic">
                 <?php
@@ -298,6 +280,10 @@
         </div>
         
         <pre>
+            @TODO : Shares -> Get number of year for action
+            @TODO : Shares -> Get % of dividend per share
+            @TODO : Shares -> Add color
+            @TODO : Hsitoric -> Add color
             @TODO : Performances -> Portfolio -> Set cash value
             @TODO : Performances -> Portfolio -> Set total
             @TODO : Performances -> Portfolio -> Active -> Set a benchmark value

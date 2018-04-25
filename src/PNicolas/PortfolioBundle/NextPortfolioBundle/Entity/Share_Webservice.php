@@ -5,9 +5,6 @@
  *
  */
 class Share_Webservice {
-	public $webservice = null;
-	public $share = null;
-	public $symbol = null;
 	
 	public static $shares = [];
 

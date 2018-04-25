@@ -23,6 +23,7 @@ class User_Share {
 		if (!array_key_exists($portfolio->id, $this->portfolios)) {
 			$this->portfolios[$portfolio->id] = new User_Share_Line();
 			$this->portfolios[$portfolio->id]->share = $share;
+			$this->portfolios[$portfolio->id]->portfolio = $portfolio;
 		}
 		
 		switch($type) {
@@ -56,5 +57,14 @@ class User_Share {
 
 				break;
 		}
+	}
+	
+	/**
+	 * is Share is active ?
+	 * @return boolean
+	 */	
+	public function isActive() {
+		return 0 < $this->total->quantity;
+		
 	}
 }
