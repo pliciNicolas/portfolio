@@ -12,21 +12,31 @@ class User_Share_Line {
 	public $spend = 0;
 	public $recieved = 0;
 	public $balance = 0;
-	public $quantity = 0;
-	public $unit_price = 0;
-	public $capital = 0;
+
+	
+	// Current capital
+	public $quantity = 0; // Current quantity
+	public $unit_price = 0: // Current unit price
+	public $capital = 0; // $quantity * $unit_price	
+	
+	// Date
+	protected $first_buying_date = null; // Last first buying date
+	protected $holding = 0; // Last holding in second
 	
 	// Dividend
-	public $dividend_price = 0;
-	public $dividend_count = 0;
-	public $dividend_average = 0;
+	public $dividend_price = 0; // Amount of dividend
+	public $dividend_count = 0; // Number of dividend
+	public $dividend_average = 0; // Average of dividend
 	public $dividend_percent = 0;
+	protected $dividend_capital = 0; // Usefull to define percent
+	public $dividend_per_action_per_year = 0;
 	
 	// Capital Gain
-	public $capitalGain_price = 0;
+	public $capitalGain_price = 0; // Sum of buying / sell share
 	public $capitalGain_percent = 0;
 	
 	// Balance
+	public $balance = 0; // Sum of all add and minus (Buying + Sell + Dividend)
 	public $gain_price = 0;
 	public $gain_percent = 0;
 	
