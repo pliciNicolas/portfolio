@@ -10,10 +10,10 @@ class User_Share {
 	public $total = null;
 	
 	public function addTransaction(\Transaction $transaction) {
-		$this->addTransactionData($transaction->portfolio, $transaction->share, $transaction->type, $transaction->quantity, $transaction->unit_price, $transaction->fee_fixed, $transaction->fee_percent);
+		$this->addTransactionData($transaction->portfolio, $transaction->share, $transaction->type, $transaction->quantity, $transaction->unit_price, $transaction->fee_fixed, $transaction->fee_percent, $transaction->date);
 	}
 	
-	public function addTransactionData(\Portfolio $portfolio, \Share $share, $type, $quantity, $unit_price, $fee_fixed, $fee_percent) {
+	public function addTransactionData(\Portfolio $portfolio, \Share $share, $type, $quantity, $unit_price, $fee_fixed, $fee_percent, \DateTime $date) {
 		if (is_null($this->total)) {
 			$this->total = new User_Share_Line();
 		}
@@ -30,19 +30,19 @@ class User_Share {
 			case Transaction::TYPE_BUY : 
 				
 				// Portfolio
-				$this->portfolios[$portfolio->id]->addBuy($unit_price, $quantity, $fee_fixed, $fee_percent);
+				$this->portfolios[$portfolio->id]->addBuy($unit_price, $quantity, $fee_fixed, $fee_percent, $date);
 				
 				// Total
-				$this->total->addBuy($unit_price, $quantity, $fee_fixed, $fee_percent);
+				$this->total->addBuy($unit_price, $quantity, $fee_fixed, $fee_percent, $date);
 
 				break;
 
 			case Transaction::TYPE_SELL : 
 				// Portfolio
-				$this->portfolios[$portfolio->id]->addSell($unit_price, $quantity, $fee_fixed, $fee_percent);
+				$this->portfolios[$portfolio->id]->addSell($unit_price, $quantity, $fee_fixed, $fee_percent, $date);
 				
 				// Total
-				$this->total->addSell($unit_price, $quantity, $fee_fixed, $fee_percent);
+				$this->total->addSell($unit_price, $quantity, $fee_fixed, $fee_percent, $date);
 
 				break;
 
