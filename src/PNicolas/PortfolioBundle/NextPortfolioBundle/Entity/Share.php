@@ -21,5 +21,6 @@ class Share {
 		$this->id = $id;
 		$this->name = $name;
 		$this->market = $market;
+		$this->symbol = $symbol;
 	}
 }

@@ -69,7 +69,7 @@ class Dashboard {
 		foreach($data['share_webservice'] as $share_webservice_item) {
 			Share_Webservice::set($share_webservice_item['id_share'], $share_webservice_item['id_webservice'], $share_webservice_item['symbol']);
 		}
-		
+
 		
 		$shares = [];
 		if (!(array_key_exists('share', $data) && is_array($data['share']) && 0<count($data['share']))) {
@@ -80,7 +80,6 @@ class Dashboard {
 			$share->set($share_item['id'], $share_item['name'], $markets[$share_item['id_market']], Share_Webservice::get($share_item['id'], $markets[$share_item['id_market']]->webservice->id) );
 			$shares[$share_item['id']] = $share;
 		}
-
 
 
 		$transactions = [];

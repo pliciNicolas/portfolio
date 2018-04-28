@@ -26,22 +26,22 @@ class User_Share_Line {
     public $capitalGain_price = 0;  // Previous capital gain
     public $capitalGain_count = 0; // Count number of capital gain
     protected $capitalGain_capital = 0; // Usefull to define capitalGain_percent
-    public $capitalGain_percent = 0; // ??
+	public $capitalGain_percent = 0; // ??
 
 
-    // Real resume data
-    public $gain_price = 0; // ??
+    // Real resume data = Dividend + Capital Gain
+    public $gain_price = 0; // Dividend + Gain Value
+    protected $gain_capital = 0; // 
+    public $gain_percent = 0; // 
+	
     public $balance = 0; // Sum of all add and minus (Buying + Sell + Dividend)
 
-    public $spend = 0;
-    public $recieved = 0;
     // Current capital
     public $quantity = 0; // Current quantity
     public $unit_price = 0; // Current unit price
     public $capital = 0; // $quantity * $unit_price	
 
     
-    public $gain_percent = 0;
 
     /**
      * Add a dividend operation
@@ -51,19 +51,41 @@ class User_Share_Line {
         $this->dividend_price += $dividend;
         $this->dividend_count += 1;
         $this->dividend_average = round($this->dividend_price / $this->dividend_count, 2);
-
-        $this->dividend_capital += $this->quantity * $this->unit_price;
+        $this->dividend_capital += $this->capital;
         $this->dividend_percent = round($this->dividend_price / $this->dividend_capital, 2);
         $this->dividend_quantity += $this->quantity;
-
-        $this->dividend_per_share_per_year = round($this->dividend_price / $this->dividend_quantity / $this->date_holding->format('Y'), 2);
+        $this->dividend_per_share_per_year = round($this->dividend_price / $this->dividend_quantity / $this->getYearHolding(), 2);
         
+		$this->gain_price += $dividend;
+		$this->gain_capital += $dividend;
+		$this->gain_percent = round($this->gain_price / $this->gain_capital * 100 , 2); 
         $this->balance += $dividend;
-
-
-//		$this->recieved += $dividend;
-//		$this->updateGain();
     }
+	
+	/**
+	 * Number of year holding share
+	 * @return int
+	 */
+	protected function getYearHolding() {
+		if (is_null($this->date_holding)) {
+			$now = new DateTime();
+			$diff = $this->date_last_first_buying->diff($now);
+			return max(1,$diff->format('Y'));
+		}
+		
+		return $this->date_holding->format('Y');
+	}
+	
+	public function getHolding() {
+		$data = $this->date_holding;
+		if (is_null($this->date_holding)) {
+			$now = new DateTime();
+			$data = $this->date_last_first_buying->diff($now);
+		}
+		
+		return $data->format('%Y years %m months %d days');
+	}
+			
 
     /**
      * Add sell operation
@@ -79,24 +101,17 @@ class User_Share_Line {
 
         $this->capitalGain_price += ($unit_price - $this->unit_price) * $quantity - $fee;
         $this->capitalGain_count++;
-        $this->capitalGain_capital += $this->unit_price * $this->quantity;
-        $this->capitalGain_percent = round($this->capitalGain_price / $this->unit_price * $this->quantity * 100, 2);
+        $this->capitalGain_capital += $this->capital;
+        $this->capitalGain_percent = round($this->capitalGain_price / $this->capitalGain_capital * 100, 2);
         
+		$this->gain_price += $price;
+		$this->gain_capital += $price;
+		$this->gain_percent = round($this->gain_price / $this->gain_capital * 100 , 2); 
         $this->balance += $price;
         
         $this->quantity -= $quantity;
-//		
-//		$this->recieved += $price;
-//		
-//		
-//		if ($this->unit_price && $this->quantity) {
-//			$this->capitalGain_percent = $this->capitalGain_price / ($this->unit_price * $this->quantity); 
-//		}
-//		
-//		$this->capital = $this->unit_price * $this->quantity;
-//		
-//		$this->updateGain();
-
+		$this->capital = $this->unit_price * $this->quantity;
+		
         if (0 == $this->quantity) {
             $new_diff = $this->date_last_first_buying->diff($date);
             if (is_null($this->date_holding)) {
@@ -121,49 +136,27 @@ class User_Share_Line {
      * @param DateTime $date
      */
     public function addBuy($unit_price, $quantity, $fee_fixed, $fee_percent, $date) {
-
         if (is_null($this->date_last_first_buying)) {
             $this->date_last_first_buying = $date;
         }
 
         $fee = $fee_fixed + round($fee_percent * $quantity * $unit_price, 2);
-        $price = ($unit_price * $quantity) - $fee;
+        $price = ($unit_price * $quantity) + $fee;
 
         $this->balance -= $price;
-//		
-//		$this->spend += $price;
-//		$this->unit_price = round(
-//						(
-//							$price 
-//							+
-//							(
-//								$this->unit_price 
-//								* 
-//								$this->quantity
-//							)
-//						) 
-//						/ 
-//						(
-//							$quantity
-//							+ 
-//							$this->quantity
-//						),2)
-//		;
-//		$this->quantity += $quantity;
-//		
-//		$this->capital = $this->unit_price * $this->quantity;
+
+		$this->quantity += $quantity;
+		$this->unit_price = round(
+						(
+							$price 
+							+
+							$this->capital 
+						) 
+						/ 
+							$this->quantity
+						,2)
+		;
+		
+		$this->capital = $this->unit_price * $this->quantity;
     }
-
-    /**
-     * Update gain values
-     */
-    protected function updateGain() {
-        $this->gain_price = $this->dividend_price + $this->capitalGain_price;
-        if ($this->unit_price && $this->quantity) {
-            $this->gain_percent = $this->gain_price / ($this->unit_price * $this->quantity);
-        }
-
-        $this->balance = $this->recieved - $this->spend;
-    }
-
 }

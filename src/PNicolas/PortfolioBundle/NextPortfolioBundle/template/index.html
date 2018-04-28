@@ -105,10 +105,9 @@
                 var share_symbol = [];
                 $("tr[data-id_share].active").each(function () {
                     var share = {};
-                    share.symbol = $(this).data('id_share');
+                    share.symbol = $(this).data('share_symbol');
                     share.open_market = $(this).data('share_openmarket');
                     share.last_price = null;
-                    //share_symbol.push($(this).data('id_share'));
                     share_symbol.push(share);
                 });
                 share_symbol = GetUnique(share_symbol);
@@ -129,7 +128,7 @@
                                 console.log('Retrieve Share "'+share.symbol+'". LastPrice : '+share.last_price+', share.open_market : '+share.open_market+', GetDay : '+today.getDay());
                             }
 
-                            var url = "<?php /*echo $templates['user']->webservice[1]->url;*/ ?>".replace("@symbol@", share.symbol);
+                            var url = "<?php echo $templates['user']->webservice[1]->url; ?>".replace("@symbol@", share.symbol);
                             var jqxhr = $.ajax(url)
                                     .done(function (msg) {
                                         $(this).price = '';
