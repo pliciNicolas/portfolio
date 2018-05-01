@@ -8,9 +8,13 @@ class User {
 	public $name = null;
 	
 	public $shares = [];
+	public $total = null;
 	public $portfolios = [];
 	public $historic = [];
         
+	public function __construct() {
+		$this->total = new User_Share_Line();
+	}
 	
 	/**
 	 * Set object
@@ -32,6 +36,28 @@ class User {
 		}
 		
 		$this->shares[$transaction->share->id]->addTransaction($transaction);
+		switch($transaction->type) {
+			case Transaction::TYPE_BUY : 
+				// Total
+				$this->total->addBuy($transaction->unit_price, $transaction->quantity, $transaction->fee_fixed, $transaction->fee_percent, $transaction->date);
+
+				break;
+
+			case Transaction::TYPE_SELL : 
+				
+				// Total
+				$this->total->addSell($transaction->unit_price, $transaction->quantity, $transaction->fee_fixed, $transaction->fee_percent, $transaction->date);
+
+				break;
+
+			case Transaction::TYPE_DIVIDEND : 
+				$dividend = $transaction->unit_price * $transaction->quantity;
+
+				// Total
+				$this->total->addDividend($dividend);
+
+				break;
+		}
 		
 		$this->historic[] = $transaction;
 	}

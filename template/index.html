@@ -12,10 +12,6 @@
         <link href="asset/css/portfolio.css" rel="stylesheet">
 
         <!-- From https://jqueryui.com/tabs/ -->
-        <!--
-                <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-        <link rel="stylesheet" href="https://jqueryui.com/resources/demos/style.css">
-        -->
 
         <!-- https://mottie.github.io/tablesorter/docs/ -->
         <link href="asset/js/tablesorter-master/dist/css/theme.default.min.css" rel="stylesheet">
@@ -31,8 +27,10 @@
             $(function () {
                 // Enable tabs
                 $(".tabs").tabs();
+                
                 // Enable table sorter
                 $(".tablesorter").tablesorter();
+                
                 // Enable tooltip
                 $( document ).tooltip();
             });
@@ -46,57 +44,16 @@
             function GetUnique(inputArray)
             {
                     var outputArray = [];
+                    var key = [];
                     for (var i = 0; i < inputArray.length; i++)
                     {
-                            if ((jQuery.inArray(inputArray[i], outputArray)) == -1)
+                            if ((jQuery.inArray(inputArray[i].symbol, key)) == -1)
                             {
+                                    key.push(inputArray[i].symbol);
                                     outputArray.push(inputArray[i]);
                             }
                     }
                     return outputArray;
-            }
-            
-            function reloadPortfolioTotal(table) {
-                var spend = 0;
-                var total_virtual_gain_price = 0;
-                var total_virtual_gain_percent = 0;
-                var total_gain_price = 0;
-                var total_gain_percent = 0;
-                table.find('tbody tr').each(function(index, tr){
-                    spend += $(tr).find('td[data-buying_unit_price]').data('buying_unit_price') * $(tr).find('td[data-quantity]').data('quantity');
-                    total_virtual_gain_price += $(tr).find('td[data-virtual_gain_price]').data('virtual_gain_price');
-                    total_gain_price += $(tr).find('td[data-gain_price]').data('gain_price');
-                });
-                total_virtual_gain_percent = total_virtual_gain_price / spend * 100;
-                total_gain_percent = total_gain_price / spend * 100;
-                
-                var virtual_gain_loose_gain = 'gain';
-                    if (total_virtual_gain_percent<0) {
-                        virtual_gain_loose_gain='loose';
-                }
-                var gain_loose_gain = 'gain';
-                    if (total_gain_percent<0) {
-                        gain_loose_gain='loose';
-                }
-                table.find('td[data-total_virtual_gain_price]').data('total_virtual_gain_price', Math.round((total_virtual_gain_price * 100) / 100));
-                table.find('tfoot span.total_virtual_gain_price').html(total_virtual_gain_price);
-                table.find('tfoot td[data-total_virtual_gain_price]').removeClass('gain loose');
-                table.find('tfoot td[data-total_virtual_gain_price]').addClass(virtual_gain_loose_gain);
-                
-                table.find('td[data-total_virtual_gain_percent]').data('total_virtual_gain_percent', Math.round((total_virtual_gain_percent * 100) / 100));
-                table.find('tfoot span.total_virtual_gain_percent').html(Math.round((total_virtual_gain_percent * 100) / 100));
-                table.find('tfoot td[data-total_virtual_gain_percent]').removeClass('gain loose');
-                table.find('tfoot td[data-total_virtual_gain_percent]').addClass(virtual_gain_loose_gain);
-                
-                table.find('td[data-total_gain_price]').data('total_gain_price', Math.round((total_gain_price * 100) / 100));
-                table.find('tfoot span.total_gain_price').html(total_gain_price);
-                table.find('tfoot td[data-total_gain_price]').removeClass('gain loose');
-                table.find('tfoot td[data-total_gain_price]').addClass(gain_loose_gain);
-                
-                table.find('td[data-total_gain_percent]').data('total_gain_percent', Math.round((total_gain_percent * 100) / 100));
-                table.find('tfoot span.total_gain_percent').html(Math.round((total_gain_percent * 100) / 100));
-                table.find('tfoot td[data-total_gain_percent]').removeClass('gain loose');
-                table.find('tfoot td[data-total_gain_percent]').addClass(gain_loose_gain);
             }
 
 
@@ -137,9 +94,7 @@
                     
                     $(share_symbol).each(function (index, share) {
                         
-                        if ((!isActive()) && (null == share.last_price || ("24" == share.open_market) || ((0 < today.getDay() && (today.getDay() < 6))))) {
-                            
-                            setActive(true);
+                        if ( (null == share.last_price || ("24" == share.open_market) || ((0 < today.getDay() && (today.getDay() < 6))))) {
                             
                             if (debug) {
                                 console.log('Retrieve Share "'+share.symbol+'". LastPrice : '+share.last_price+', share.open_market : '+share.open_market+', GetDay : '+today.getDay());
@@ -198,12 +153,12 @@
                         $(this).find('[data-current_unit_price]').html(current_price);
                         
                         // Retrieve values
-                        var capital = parseFloat($(this).find('[data-capital]').data('capital'));
-                        var buying_price = parseFloat($(this).find('[data-buying_unit_price]').data('buying_unit_price'));
-                        var quantity = parseInt($(this).find('[data-quantity]').data('quantity'));
+                        var capital = parseFloat($(this).data('capital'));
+                        var buying_price = parseFloat($(this).data('buying_unit_price'));
+                        var quantity = parseInt($(this).data('quantity'));
                         var share_fee_fixed = parseFloat($(this).data('portfolio_share_fee_fixed'));
                         var share_fee_percent = parseFloat($(this).data('portfolio_share_fee_percent'));
-                        var gain_price = parseFloat($(this).find('[data-gain_price]').data('gain_price'));
+                        var gain_price = parseFloat($(this).data('gain_price'));
                         
                         // Calculate
                         var virtual_capital = (current_price * quantity * (1-share_fee_percent)) - share_fee_fixed;
@@ -333,6 +288,7 @@
                 
                 ?>
                 <ul>
+                    <li><a href="#tab-share-resume">Resume</a></li>
                     <?php 
                     foreach($share_by_name as $name => $user_share) {
                     ?>
@@ -342,6 +298,11 @@
                     ?>
                 </ul>
 
+                <div id="tab-share-resume" class="share" >
+                    <?php
+                    include __DIR__.'/share_resume.inc.html';
+                    ?>
+                </div>
                 <?php 
                 foreach($share_by_name as $name => $user_share) {
                 ?>
@@ -362,21 +323,18 @@
         </div>
         
         <pre>
-            @TODO : Add tooltips for long table
-            @TODO : Shares -> Get number of year for action
-            @TODO : Shares -> Get % of dividend per share
+            @TODO : Shares -> Resumes
+            @TODO : Portfolios -> 1 page per portfolio
+            @TODO : Portfolios -> 1 page per portfolio active  /unactive
+            @TODO : Portfolios -> Resumes
+            @TODO : Portfolios -> Add cash / balance
+            @TODO : Benchmark
             @TODO : Shares -> Add color
             @TODO : Hsitoric -> Add color
-            @TODO : Performances -> Portfolio -> Set cash value
-            @TODO : Performances -> Portfolio -> Set total
-            @TODO : Performances -> Portfolio -> Active -> Set a benchmark value
-            @TODO : Performances -> Portfolio -> Set cash history value
-            @TODO : Performances -> Portfolio -> Not Active -> Set quantity, unit_price mine and all CAC40, history 
-            @TODO : Performances -> Portfolio -> Active -> Set quantity, unit_price mine and all CAC40, history 
+            @TODO : Benchmark : Make an historic
+            @TODO : Porfolio : Make an historic
             @TODO : Performances -> Portfolio -> Set graph with benchmark
             @TODO : Order and align table
-            @TODO : Rebuild webservice management 
-            @TODO : Replace last fee by fee
             @TODO : Swap to https://fr.tradingview.com/rest-api-spec/
         </pre>
 
