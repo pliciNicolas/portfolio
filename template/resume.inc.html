@@ -1,0 +1,38 @@
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <th>Share</th>
+            <th>Share daily gain (%)</th>
+            <th>Share user overall gain (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        foreach ($templateVar['user']->shares as $id_share => $share) {
+            if ($share->total->quantity) {
+        ?>
+        <tr 
+            data-id_share="<?php echo Share_webservice::get($share->share, $templates['user']->webservice[1]->webservice); ?>"
+            data-share_openmarket="<?php echo $share->share->open_market; ?>"
+            data-id_webservice="<?php echo $templates['user']->webservice[1]->webservice->id; ?>"
+            class="active"
+        >
+            <td>
+                <?php echo $share->share->name; ?>
+            </td>
+            <td
+                data-loose_gain="<?php echo (0<$share->totalGain?'gain':'loose'); ?>"
+                data-totalGain="<?php echo $share->totalGain; ?>"
+            >
+            </td>
+            <td
+                data-quantity="<?php echo $share->quantity; ?>"
+            >
+            </td>
+        </tr>
+        <?php 
+            }
+        }
+        ?>
+    </tbody>
+</table>

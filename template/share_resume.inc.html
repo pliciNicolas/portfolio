@@ -1,0 +1,118 @@
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <th>Share</th>
+            <th title="Dividend">Div.</th>
+            <th title="Capital gain">Cap. gain</th>
+            <th>Gain</th>
+            <th>Balance</th>
+            <th title=">Quantity">Qty.</th>
+            <th title="Virtual capital gain">Vir. Cap. gain</th>
+            <th title="Virtual capital percent">Vir. Cap. %</th>
+            <th title="Overall gain">Over.</th>
+            <th title="Overall percent">Over. %</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        foreach ($share_by_name as $name => $user_share) {
+            $first_portfolio = reset($user_share->portfolios);
+            $first_portfolio = $first_portfolio->portfolio;
+        ?>
+        <tr 
+            data-id_share="<?php echo $user_share->share->id; ?>"
+            data-share_symbol="<?php echo $user_share->share->symbol; ?>"
+            data-portfolio_share_fee_fixed="<?php echo $first_portfolio->fee_fixed; ?>"
+            data-portfolio_share_fee_percent="<?php echo $first_portfolio->fee_percent; ?>"
+            data-quantity="<?php echo $user_share->total->quantity; ?>"
+            data-capital="<?php echo $user_share->total->capital; ?>"
+            data-share_openmarket="<?php echo $user_share->share->market->openHours; ?>"
+            data-share_active="<?php echo ($user_share->total->quantity?'active':'unactive'); ?>"
+            data-share_url="<?php echo $user_share->share->market->webservice->getUrl($user_share->share->symbol); ?>"
+            data-gain_price="<?php echo $user_share->total->gain_price; ?>"
+            data-buying_unit_price="<?php echo $user_share->total->unit_price; ?>"
+            >
+            <td class="portfolio_name">
+                <?php echo $user_share->share->name; ?>
+            </td>
+            <td class="dividend_amount">
+                <?php echo $user_share->total->dividend_price; ?>
+                <?php echo $first_portfolio->currency; ?>
+            </td>
+            <td class="capital_gain">
+                <?php echo $user_share->total->capitalGain_price; ?>
+                <?php echo $first_portfolio->currency; ?>
+            </td>
+            <td class="gain_price">
+                <span data-gain_price="<?php echo $user_share->total->gain_price; ?>"><?php echo $user_share->total->gain_price; ?></span>
+                <?php echo $first_portfolio->currency; ?>
+            </td>
+            <td class="balance">
+                <?php echo $user_share->total->balance; ?>
+                <?php echo $first_portfolio->currency; ?>
+            </td>
+            <td class="quantity">
+                <span data-quantity="<?php echo $user_share->total->quantity; ?>"><?php echo $user_share->total->quantity; ?></span>
+            </td>
+            <td class="virtual_capital_gain">
+                <span data-virtual_capital_gain="" class="refresh"></span>
+                <?php echo ($user_share->total->quantity?$first_portfolio->currency:'') ?>
+            </td>
+            <td class="virtual_gain_percent">
+                <span data-virtual_gain_percent="" class="refresh"></span>
+                <?php echo ($user_share->total->quantity?"%":'') ?>
+            </td>
+            <td class="overall_gain">
+                <span data-overall_gain="" class="refresh"></span>
+                <?php echo ($user_share->total->quantity?$first_portfolio->currency:'') ?>
+            </td>
+            <td class="overall_percent">
+                <span data-overall_percent="" class="refresh"></span>
+                <?php echo ($user_share->total->quantity?"%":'') ?>
+            </td>
+        </tr>
+        <?php 
+        }
+        ?>
+    </tbody>
+    <tfoot>
+        <td class='total'>
+            Total
+        </td>
+        <td class='dividend_amount'>
+            <?php echo $templateVar['user']->total->dividend_price; ?>
+            <?php echo $first_portfolio->currency; ?>
+        </td>
+        <td class="capital_gain">
+            <?php echo $templateVar['user']->total->capitalGain_price; ?>
+            <?php echo $first_portfolio->currency; ?>
+        </td>
+        <td class="gain_price">
+            <?php echo $templateVar['user']->total->gain_price; ?>
+            <?php echo $first_portfolio->currency; ?>
+        </td>
+        <td class="balance">
+            <?php echo $templateVar['user']->total->balance; ?>
+            <?php echo $first_portfolio->currency; ?>
+        </td>
+        <td class="quantity">
+            <?php echo $templateVar['user']->total->quantity; ?>
+        </td>
+        <td class="virtual_capital_gain">
+            <span data-virtual_capital_gain="" class="refresh"></span>
+            <?php echo $first_portfolio->currency; ?>
+        </td>
+        <td class="virtual_gain_percent">
+            <span data-virtual_gain_percent="" class="refresh"></span>
+            %
+        </td>
+        <td class="overall_gain">
+            <span data-overall_gain="" class="refresh"></span>
+            <?php echo $first_portfolio->currency; ?>
+        </td>
+        <td class="overall_percent">
+            <span data-overall_percent="" class="refresh"></span>
+            %
+        </td>
+    </tfoot>
+</table>
