@@ -1,17 +1,35 @@
 <?php
 
+/**
+ * Description of Share_Webservice
+ *
+ */
 class Share_Webservice {
 	
-	static protected $share_symbol = [];
-	
-	static public function add(\Share $share, \Webservice $webservice, $symbol) {
-		if (!array_key_exists($webservice->id, self::$share_symbol)) {
-			self::$share_symbol[$webservice->id] = [];
+	public static $shares = [];
+
+
+	/**
+	 * Set object
+	 * @param int $id_share
+	 * @param int $id_webservice
+	 * @param string $symbol
+	 */
+	static public function set($id_share, $id_webservice, $symbol) {
+		if (!array_key_exists($id_share, self::$shares)) {
+			self::$shares[$id_share] = [];
 		}
-		self::$share_symbol[$webservice->id][$share->id] = [ 'share' => $share, 'webservice' => $webservice, 'symbol' =>$symbol];
+		
+		self::$shares[$id_share][$id_webservice] = $symbol;
 	}
 	
-	static public function get(\Share $share, \Webservice $webservice) {
-		return self::$share_symbol[$webservice->id][$share->id]['symbol'];
+	/**
+	 * Get symbol for a share in webservice
+	 * @param int $id_share
+	 * @param int $id_webservice
+	 * @return string
+	 */
+	static public function get($id_share, $id_webservice) {
+		return self::$shares[$id_share][$id_webservice];
 	}
 }

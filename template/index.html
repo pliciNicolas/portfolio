@@ -31,7 +31,10 @@
             $(function () {
                 // Enable tabs
                 $(".tabs").tabs();
+                // Enable table sorter
                 $(".tablesorter").tablesorter();
+                // Enable tooltip
+                $( document ).tooltip();
             });
             
             
@@ -103,12 +106,12 @@
                 
                 // Get list of unique share to reload
                 var share_symbol = [];
-                $("tr[data-id_share].active").each(function () {
+                $("tr[data-id_share][data-share_active='active']").each(function () {
                     var share = {};
-                    share.symbol = $(this).data('id_share');
+                    share.symbol = $(this).data('share_symbol');
                     share.open_market = $(this).data('share_openmarket');
                     share.last_price = null;
-                    //share_symbol.push($(this).data('id_share'));
+                    share.url = $(this).data('share_url');
                     share_symbol.push(share);
                 });
                 share_symbol = GetUnique(share_symbol);
@@ -116,20 +119,33 @@
                 if (debug) {
                     console.log(share_symbol);
                 }
-
-
+                
                 var today = new Date();
+                global_active = false;
+                function setActive(active) {
+                    global_active = active;
+                }
+                function isActive() {
+                    return global_active;
+                }
+
+
+                
                 function reloadShare() {
+                    
                     var share_count = share_symbol.length;
+                    
                     $(share_symbol).each(function (index, share) {
                         
-                        if (null == share.last_price || ("24" == share.open_market) || ((0 < today.getDay() && (today.getDay() < 6)))) {
-                        
+                        if ((!isActive()) && (null == share.last_price || ("24" == share.open_market) || ((0 < today.getDay() && (today.getDay() < 6))))) {
+                            
+                            setActive(true);
+                            
                             if (debug) {
                                 console.log('Retrieve Share "'+share.symbol+'". LastPrice : '+share.last_price+', share.open_market : '+share.open_market+', GetDay : '+today.getDay());
                             }
 
-                            var url = "<?php echo $templates['user']->webservice[1]->url; ?>".replace("@symbol@", share.symbol);
+                            var url = share.url;
                             var jqxhr = $.ajax(url)
                                     .done(function (msg) {
                                         $(this).price = '';
@@ -150,57 +166,15 @@
                                         if (null == current_price) {
                                             $().toastmessage('showWarningToast', share.symbol + " price is null");
                                         } else {
-                                            $("tr[data-id_share='"+share.symbol+"'].active").each(function () {
-                                                $(this).find('td[data-current_unit_price]').data('current_unit_price', current_price);
-                                                $(this).find('td[data-current_unit_price] span.current_unit_price').html(current_price);
-
-                                                var buying_price = parseFloat($(this).find('[data-buying_unit_price]').data('buying_unit_price'));
-                                                var quantity = parseInt($(this).find('[data-quantity]').data('quantity'));
-                                                var last_fee_fixed = parseFloat($(this).data('last_fee_fixed'));
-                                                var last_fee_percent = parseFloat($(this).data('last_fee_percent'));
-                                                var virtual_gain = ((current_price - buying_price) * quantity) - last_fee_fixed - (last_fee_percent * quantity * buying_price);
-                                                var virtual_gain_percent = virtual_gain / (buying_price * quantity) * 100;
-
-                                                var capitalGain = parseFloat($(this).find('[data-totalGain]').data('totalgain'));
-                                                var virtual_gain_loose_gain = 'gain';
-                                                if (virtual_gain<0) {
-                                                    virtual_gain_loose_gain='loose';
-                                                }
-                                                $(this).find('td[data-virtual_gain_price] span.virtual_gain_price').html(Math.round((virtual_gain * 100) / 100));
-                                                $(this).find('td[data-virtual_gain_price]').data('virtual_gain_price', Math.round((virtual_gain * 100) / 100));
-                                                $(this).find('td[data-virtual_gain_price]').removeClass('gain loose');
-                                                $(this).find('td[data-virtual_gain_price]').addClass(virtual_gain_loose_gain);
-
-                                                $(this).find('td[data-virtual_gain_percent] span.virtual_gain_percent').html(Math.round((virtual_gain_percent * 100) / 100));
-                                                $(this).find('td[data-virtual_gain_percent]').data('virtual_gain_percent', Math.round((virtual_gain_percent * 100) / 100));
-                                                $(this).find('td[data-virtual_gain_percent]').removeClass('gain loose');
-                                                $(this).find('td[data-virtual_gain_percent]').addClass(virtual_gain_loose_gain);
-
-                                                var gain = virtual_gain + capitalGain;
-                                                var gain_percent = gain / (buying_price * quantity) * 100;
-                                                var gain_loose_gain = 'gain';
-                                                if (gain<0) {
-                                                    gain_loose_gain='loose';
-                                                }
-                                                $(this).find('td[data-gain_price] span.gain_price').html(Math.round((gain * 100) / 100));
-                                                $(this).find('td[data-gain_price]').data('gain_price', Math.round((gain * 100) / 100));
-                                                $(this).find('td[data-gain_price]').removeClass('gain loose');
-                                                $(this).find('td[data-gain_price]').addClass(gain_loose_gain);
-
-                                                $(this).find('td[data-gain_percent] span.gain_percent').html(Math.round((gain_percent * 100) / 100));
-                                                $(this).find('td[data-gain_percent]').data('gain_percent', Math.round((gain_percent * 100) / 100));
-                                                $(this).find('td[data-gain_percent]').removeClass('gain loose');
-                                                $(this).find('td[data-gain_percent]').addClass(gain_loose_gain);
-
-                                                reloadPortfolioTotal($(this).parents('table'));
-
-                                             });
+                                            updateShareLine(share.symbol, current_price);
+                                            updateShareTableTotal(share.symbol);
                                          }
 
                                          share_count--;
 
                                          if (0==share_count)  {
                                              $().toastmessage('showSuccessToast', "Prices updated");
+                                             setActive(false);
                                          }
 
 
@@ -214,6 +188,114 @@
                                         //alert( "complete");
                                     });
                         }
+                    });
+                }
+                
+                function updateShareLine(symbol, current_price) {
+                    $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
+                        // Set current price
+                        $(this).find('[data-current_unit_price]').data('current_unit_price', current_price);
+                        $(this).find('[data-current_unit_price]').html(current_price);
+                        
+                        // Retrieve values
+                        var capital = parseFloat($(this).find('[data-capital]').data('capital'));
+                        var buying_price = parseFloat($(this).find('[data-buying_unit_price]').data('buying_unit_price'));
+                        var quantity = parseInt($(this).find('[data-quantity]').data('quantity'));
+                        var share_fee_fixed = parseFloat($(this).data('portfolio_share_fee_fixed'));
+                        var share_fee_percent = parseFloat($(this).data('portfolio_share_fee_percent'));
+                        var gain_price = parseFloat($(this).find('[data-gain_price]').data('gain_price'));
+                        
+                        // Calculate
+                        var virtual_capital = (current_price * quantity * (1-share_fee_percent)) - share_fee_fixed;
+                        var virtual_capital_gain = virtual_capital - capital;
+                        var virtual_gain_percent = virtual_capital_gain / capital * 100;
+                        var overall_gain = virtual_capital_gain + gain_price;
+                        var overall_percent = overall_gain / capital * 100;
+
+                        if (debug) {
+                            console.log('Symbol : ' + symbol);
+                            console.log('capital : ' + capital);
+                            console.log('buying_price : ' + buying_price);
+                            console.log('quantity : ' + quantity);
+                            console.log('share_fee_fixed : ' + share_fee_fixed);
+                            console.log('share_fee_percent : ' + share_fee_percent);
+                            console.log('gain_price : ' + gain_price);
+                            console.log('virtual_capital : ' + virtual_capital);
+                            console.log('virtual_capital_gain : ' + virtual_capital_gain);
+                            console.log('virtual_gain_percent : ' + virtual_gain_percent);
+                            console.log('overall_gain : ' + overall_gain);
+                            console.log('overall_percent : ' + overall_percent);
+                        }
+
+
+                        // Set Virtual capital
+                        $(this).find('[data-virtual_capital]').data('virtual_capital', virtual_capital);
+                        $(this).find('[data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
+                        
+                        // Set Virtual capital gain
+                        $(this).find('[data-virtual_capital_gain]').data('virtual_capital_gain', virtual_capital_gain);
+                        $(this).find('[data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100) / 100));
+                        
+                        // Set Virtual capital gain percent
+                        $(this).find('[data-virtual_gain_percent]').data('virtual_gain_percent', virtual_gain_percent);
+                        $(this).find('[data-virtual_gain_percent]').html(Math.round((virtual_gain_percent * 100) / 100));
+
+                        // Set overall gain
+                        $(this).find('[data-overall_gain]').data('overall_gain', overall_gain);
+                        $(this).find('[data-overall_gain]').html(Math.round((overall_gain * 100) / 100));
+                        
+                        // Set overall percent
+                        $(this).find('[data-overall_percent]').data('overall_percent', overall_percent);
+                        $(this).find('[data-overall_percent]').html(Math.round((overall_percent * 100) / 100));
+                    });
+                }
+                
+                function updateShareTableTotal(symbol) {
+                    $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
+                        
+                        // Search table to get sum
+                        $(this).parents('table').each(function () {
+                            // Init data
+                            var capital = 0;
+                            var quantity = 0;
+                            var share_fee_fixed = 0;
+                            var share_fee_percent = 0;
+                            var gain_price = 0;
+                            var virtual_capital = 0;
+                            $(this).find('tbody tr').each(function() {
+                                capital += parseFloat($(this).find('[data-capital]').data('capital'));
+                                quantity += parseInt($(this).find('[data-quantity]').data('quantity'));
+                                share_fee_fixed += parseFloat($(this).data('portfolio_share_fee_fixed'));
+                                share_fee_percent += parseFloat($(this).data('portfolio_share_fee_percent')) * capital;
+                                gain_price += parseFloat($(this).find('[data-gain_price]').data('gain_price'));
+                                virtual_capital += parseFloat($(this).find('[data-virtual_capital]').data('virtual_capital'));
+                            });
+                            // Calculate
+                            var virtual_capital_gain = virtual_capital - capital;
+                            var virtual_gain_percent = virtual_capital_gain / capital * 100;
+                            var overall_gain = virtual_capital_gain + gain_price;
+                            var overall_percent = overall_gain / capital * 100;
+  
+                            // Set Virtual capital
+                            $(this).find('tfoot [data-virtual_capital]').data('virtual_capital', virtual_capital);
+                            $(this).find('tfoot [data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
+
+                            // Set Virtual capital gain
+                            $(this).find('tfoot [data-virtual_capital_gain]').data('virtual_capital_gain', virtual_capital_gain);
+                            $(this).find('tfoot [data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100) / 100));
+
+                            // Set Virtual capital gain percent
+                            $(this).find('tfoot [data-virtual_gain_percent]').data('virtual_gain_percent', virtual_gain_percent);
+                            $(this).find('tfoot [data-virtual_gain_percent]').html(Math.round((virtual_gain_percent * 100) / 100));
+
+                            // Set overall gain
+                            $(this).find('tfoot [data-overall_gain]').data('overall_gain', overall_gain);
+                            $(this).find('tfoot [data-overall_gain]').html(Math.round((overall_gain * 100) / 100));
+
+                            // Set overall percent
+                            $(this).find('tfoot [data-overall_percent]').data('overall_percent', overall_percent);
+                            $(this).find('tfoot [data-overall_percent]').html(Math.round((overall_percent * 100) / 100));
+                        });
                     });
                 }
                 
@@ -232,93 +314,59 @@
 
     </head>
     <body>
-        <h1>Bonjour <?php echo $templates['user']->name; ?></h1>
+        <h1>Bonjour <?php echo $templateVar['user']->name; ?></h1>
         <div class="tabs">
             <ul>
-                <li><a href="#tab-performances">Performances</a></li>
+                <li><a href="#tab-shares">Shares</a></li>
                 <li><a href="#tab-historic">Historic</a></li>
             </ul>
 
-            <div id="tab-performances">
-                <div class="tabs">
-                    <ul>
-                        <?php 
-                        foreach ($templates['dashboard']['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
-                        ?>
-                        <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>"><?php echo $performance_portfolio->portfolio->name;?></a></li>
-                        <?php 
-                        }
-                        ?>
-                    </ul>
-
+            <div id="tab-shares" class='tabs'>
+                <?php
+                
+                // Order shares by name
+                $share_by_name = [];
+                foreach($templateVar['user']->shares as $user_share) {
+                    $share_by_name[$user_share->share->name] = $user_share;
+                }
+                ksort($share_by_name);
+                
+                ?>
+                <ul>
                     <?php 
-                    foreach ($templates['dashboard']['performance']['byPortfolio']['portfolios'] as $performance_portfolio) {
-                        
+                    foreach($share_by_name as $name => $user_share) {
                     ?>
-                    <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>">
-                        <div class="tabs">
-                            <ul>
-                                <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-active">Active</a></li>
-                                <li><a href="#tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-inactive">Inactive</a></li>
-                            </ul>
-                            
-                            <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-active">
-                                <?php
-                                include __DIR__.'/portfolio-shares-active.inc.html';
-                                ?>
-                            </div>
-                            <div id="tab-performance-portfolio-<?php echo $performance_portfolio->portfolio->id;?>-inactive">
-                                <?php
-                                include __DIR__.'/portfolio-shares-inactive.inc.html';
-                                ?>
-                            </div>
-                        </div>
-                    </div>
+                    <li><a href="#tab-share-<?php echo $user_share->share->id;?>"><?php echo $name.($user_share->isActive()?' *':'');?></a></li>
                     <?php 
                     }
                     ?>
+                </ul>
+
+                <?php 
+                foreach($share_by_name as $name => $user_share) {
+                ?>
+                <div id="tab-share-<?php echo $user_share->share->id;?>" class="share <?php echo $name.($user_share->isActive()?'active':'inactive');?>" >
+                    <?php
+                    include __DIR__.'/share.inc.html';
+                    ?>
                 </div>
-                        
+                <?php 
+                }
+                ?>
             </div>
             <div id="tab-historic">
-                <table class="tablesorter">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Portfolio</th>
-                            <th>Share</th>
-                            <th>Quantity</th>
-                            <th>Unit Price</th>
-                            <th>Type</th>
-                            <th>Fee Fixed</th>
-                            <th>Fee percent</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        foreach ($templates['dashboard']['historic'] as $transaction) {
-                        ?>
-                        <tr 
-                            data-id_share="<?php echo $transaction->share->id; ?>"
-                        >
-                            <th><?php echo $transaction->date->format('d/m/Y'); ?></th>
-                            <th><?php echo $transaction->portfolio->name; ?></th>
-                            <th><?php echo $transaction->share->name; ?></th>
-                            <th><?php echo $transaction->quantity; ?></th>
-                            <th><?php echo $transaction->unit_price; ?></th>
-                            <th><?php echo $transaction->type; ?></th>
-                            <th><?php echo $transaction->fee_fixed; ?></th>
-                            <th><?php echo $transaction->fee_percent; ?></th>
-                        </tr>
-                        <?php 
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                <?php
+                include __DIR__.'/historic.inc.html';
+                ?>
             </div>
         </div>
         
         <pre>
+            @TODO : Add tooltips for long table
+            @TODO : Shares -> Get number of year for action
+            @TODO : Shares -> Get % of dividend per share
+            @TODO : Shares -> Add color
+            @TODO : Hsitoric -> Add color
             @TODO : Performances -> Portfolio -> Set cash value
             @TODO : Performances -> Portfolio -> Set total
             @TODO : Performances -> Portfolio -> Active -> Set a benchmark value

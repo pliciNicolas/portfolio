@@ -12,7 +12,3 @@ tfoot {
 body .tablesorter-default tfoot tr td {
     border-top: 1px #808080 dashed;
 }
-
-[data-id_share="ILD"] {
-    background-color: #82cffa;
-}
