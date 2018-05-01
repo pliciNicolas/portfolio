@@ -118,12 +118,12 @@
                 }
                 
                 var today = new Date();
-                active = false;
+                global_active = false;
                 function setActive(active) {
-                    active = active;
+                    global_active = active;
                 }
                 function isActive() {
-                    return active;
+                    return global_active;
                 }
 
 
@@ -164,6 +164,7 @@
                                             $().toastmessage('showWarningToast', share.symbol + " price is null");
                                         } else {
                                             updateShareLine(share.symbol, current_price);
+                                            updateShareTableTotal(share.symbol);
                                          }
 
                                          share_count--;
@@ -227,7 +228,6 @@
                         $(this).find('[data-virtual_capital]').data('virtual_capital', virtual_capital);
                         $(this).find('[data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
                         
-                        
                         // Set Virtual capital gain
                         $(this).find('[data-virtual_capital_gain]').data('virtual_capital_gain', virtual_capital_gain);
                         $(this).find('[data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100) / 100));
@@ -243,6 +243,55 @@
                         // Set overall percent
                         $(this).find('[data-overall_percent]').data('overall_percent', overall_percent);
                         $(this).find('[data-overall_percent]').html(Math.round((overall_percent * 100) / 100));
+                    });
+                }
+                
+                function updateShareTableTotal(symbol) {
+                    $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
+                        
+                        // Search table to get sum
+                        $(this).parents('table').each(function () {
+                            // Init data
+                            var capital = 0;
+                            var quantity = 0;
+                            var share_fee_fixed = 0;
+                            var share_fee_percent = 0;
+                            var gain_price = 0;
+                            var virtual_capital = 0;
+                            $(this).find('tbody tr').each(function() {
+                                capital += parseFloat($(this).find('[data-capital]').data('capital'));
+                                quantity += parseInt($(this).find('[data-quantity]').data('quantity'));
+                                share_fee_fixed += parseFloat($(this).data('portfolio_share_fee_fixed'));
+                                share_fee_percent += parseFloat($(this).data('portfolio_share_fee_percent')) * capital;
+                                gain_price += parseFloat($(this).find('[data-gain_price]').data('gain_price'));
+                                virtual_capital += parseFloat($(this).find('[data-virtual_capital]').data('virtual_capital'));
+                            });
+                            // Calculate
+                            var virtual_capital_gain = virtual_capital - capital;
+                            var virtual_gain_percent = virtual_capital_gain / capital * 100;
+                            var overall_gain = virtual_capital_gain + gain_price;
+                            var overall_percent = overall_gain / capital * 100;
+  
+                            // Set Virtual capital
+                            $(this).find('tfoot [data-virtual_capital]').data('virtual_capital', virtual_capital);
+                            $(this).find('tfoot [data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
+
+                            // Set Virtual capital gain
+                            $(this).find('tfoot [data-virtual_capital_gain]').data('virtual_capital_gain', virtual_capital_gain);
+                            $(this).find('tfoot [data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100) / 100));
+
+                            // Set Virtual capital gain percent
+                            $(this).find('tfoot [data-virtual_gain_percent]').data('virtual_gain_percent', virtual_gain_percent);
+                            $(this).find('tfoot [data-virtual_gain_percent]').html(Math.round((virtual_gain_percent * 100) / 100));
+
+                            // Set overall gain
+                            $(this).find('tfoot [data-overall_gain]').data('overall_gain', overall_gain);
+                            $(this).find('tfoot [data-overall_gain]').html(Math.round((overall_gain * 100) / 100));
+
+                            // Set overall percent
+                            $(this).find('tfoot [data-overall_percent]').data('overall_percent', overall_percent);
+                            $(this).find('tfoot [data-overall_percent]').html(Math.round((overall_percent * 100) / 100));
+                        });
                     });
                 }
                 
