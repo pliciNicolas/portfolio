@@ -18,7 +18,7 @@
             <th>Quantity</th>
             <th>Buying unit price</th>
             <th>Current price</th>
-            <th>Current performance</th>
+            <th>Virtual Capital</th>
             <th>Virtual capitain gain</th>
             <th>Virtual capitain gain percent</th>
             <th>Overall gain</th>
@@ -33,8 +33,13 @@
             data-id_share="<?php echo $user_share->share->id; ?>"
             data-share_symbol="<?php echo $user_share->share->symbol; ?>"
             data-id_portfolio="<?php echo $user_share_line->portfolio->id; ?>"
+            data-portfolio_share_fee_fixed="<?php echo $user_share_line->portfolio->fee_fixed; ?>"
+            data-portfolio_share_fee_percent="<?php echo $user_share_line->portfolio->fee_percent; ?>"
+            data-quantity="<?php echo $user_share_line->quantity; ?>"
+            data-capital="<?php echo $user_share_line->capital; ?>"
             data-share_openmarket="<?php echo $user_share_line->share->market->openHours; ?>"
-            class="<?php echo ($user_share_line->quantity?'active':'unactive'); ?>"
+            data-share_active="<?php echo ($user_share_line->quantity?'active':'unactive'); ?>"
+            data-share_url="<?php echo $user_share_line->share->market->webservice->getUrl($user_share->share->symbol); ?>"
             >
             <td class="portfolio_name">
                 <?php echo $user_share_line->portfolio->name; ?>
@@ -73,7 +78,7 @@
                 %
             </td>
             <td class="gain_price">
-                <?php echo $user_share_line->gain_price; ?>
+                <span data-gain_price="<?php echo $user_share_line->gain_price; ?>"><?php echo $user_share_line->gain_price; ?></span>
                 <?php echo $user_share_line->portfolio->currency; ?>
             </td>
             <td class="gain_percent">
@@ -85,36 +90,39 @@
                 <?php echo $user_share_line->portfolio->currency; ?>
             </td>
             <td class="capital">
-                <?php echo $user_share_line->capital; ?>
+                <span data-capital="<?php echo $user_share_line->capital; ?>"><?php echo $user_share_line->capital; ?></span>
                 <?php echo $user_share_line->portfolio->currency; ?>
             </td>
             <td class="quantity">
-                <?php echo $user_share_line->quantity; ?>
+                <span data-quantity="<?php echo $user_share_line->quantity; ?>"><?php echo $user_share_line->quantity; ?></span>
             </td>
             <td class="buying_unit_price">
-                <?php echo $user_share_line->unit_price; ?>
+                <span data-buying_unit_price="<?php echo $user_share_line->unit_price; ?>"><?php echo $user_share_line->unit_price; ?></span>
                 <?php echo $user_share_line->portfolio->currency; ?>
             </td>
             <td class="current_price">
-                <span class="refresh"></span>
+                <span data-current_unit_price="" class="refresh"></span>
                 <?php echo $user_share_line->portfolio->currency; ?>
             </td>
-            <td class="current_performance">
-                <span class="refresh"></span>
+            <td class="virtual_capital">
+                <span data-virtual_capital="" class="refresh"></span>
+                <?php echo $user_share_line->portfolio->currency; ?>
             </td>
             <td class="virtual_capital_gain">
-                <span class="refresh"></span>
+                <span data-virtual_capital_gain="" class="refresh"></span>
                 <?php echo $user_share_line->portfolio->currency; ?>
             </td>
-            <td class="virtual_capital_gain_percent">
-                <span class="refresh"></span>
+            <td class="virtual_gain_percent">
+                <span data-virtual_gain_percent="" class="refresh"></span>
+                %
             </td>
             <td class="overall_gain">
-                <span class="refresh"></span>
+                <span data-overall_gain="" class="refresh"></span>
                 <?php echo $user_share_line->portfolio->currency; ?>
             </td>
             <td class="overall_percent">
-                <span class="refresh"></span>
+                <span data-overall_percent="" class="refresh"></span>
+                %
             </td>
         </tr>
         <?php 
@@ -185,15 +193,17 @@
             <span class="refresh"></span>
             <?php echo $user_share_line->portfolio->currency; ?>
         </td>
-        <td class="current_performance">
+        <td class="virtual_capital">
             <span class="refresh"></span>
+            <?php echo $user_share_line->portfolio->currency; ?>
         </td>
         <td class="virtual_capital_gain">
             <span class="refresh"></span>
             <?php echo $user_share_line->portfolio->currency; ?>
         </td>
-        <td class="virtual_capital_gain_percent">
+        <td class="virtual_capital_percent">
             <span class="refresh"></span>
+            %
         </td>
         <td class="overall_gain">
             <span class="refresh"></span>
@@ -201,6 +211,7 @@
         </td>
         <td class="overall_percent">
             <span class="refresh"></span>
+            %
         </td>
     </tfoot>
 </table>

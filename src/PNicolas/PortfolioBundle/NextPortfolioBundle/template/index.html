@@ -103,11 +103,12 @@
                 
                 // Get list of unique share to reload
                 var share_symbol = [];
-                $("tr[data-id_share].active").each(function () {
+                $("tr[data-id_share][data-share_active='active']").each(function () {
                     var share = {};
                     share.symbol = $(this).data('share_symbol');
                     share.open_market = $(this).data('share_openmarket');
                     share.last_price = null;
+                    share.url = $(this).data('share_url');
                     share_symbol.push(share);
                 });
                 share_symbol = GetUnique(share_symbol);
@@ -115,11 +116,24 @@
                 if (debug) {
                     console.log(share_symbol);
                 }
-
-
+                
                 var today = new Date();
+                active = false;
+                function setActive(active) {
+                    active = active;
+                }
+                function isActive() {
+                    return active;
+                }
+
+
+                
                 function reloadShare() {
+                    
+                    setActive(true);
+                    
                     var share_count = share_symbol.length;
+                    
                     $(share_symbol).each(function (index, share) {
                         
                         if (null == share.last_price || ("24" == share.open_market) || ((0 < today.getDay() && (today.getDay() < 6)))) {
@@ -128,7 +142,7 @@
                                 console.log('Retrieve Share "'+share.symbol+'". LastPrice : '+share.last_price+', share.open_market : '+share.open_market+', GetDay : '+today.getDay());
                             }
 
-                            var url = "<?php echo $templates['user']->webservice[1]->url; ?>".replace("@symbol@", share.symbol);
+                            var url = share.url;
                             var jqxhr = $.ajax(url)
                                     .done(function (msg) {
                                         $(this).price = '';
@@ -149,57 +163,13 @@
                                         if (null == current_price) {
                                             $().toastmessage('showWarningToast', share.symbol + " price is null");
                                         } else {
-                                            $("tr[data-id_share='"+share.symbol+"'].active").each(function () {
-                                                $(this).find('td[data-current_unit_price]').data('current_unit_price', current_price);
-                                                $(this).find('td[data-current_unit_price] span.current_unit_price').html(current_price);
-
-                                                var buying_price = parseFloat($(this).find('[data-buying_unit_price]').data('buying_unit_price'));
-                                                var quantity = parseInt($(this).find('[data-quantity]').data('quantity'));
-                                                var last_fee_fixed = parseFloat($(this).data('last_fee_fixed'));
-                                                var last_fee_percent = parseFloat($(this).data('last_fee_percent'));
-                                                var virtual_gain = ((current_price - buying_price) * quantity) - last_fee_fixed - (last_fee_percent * quantity * buying_price);
-                                                var virtual_gain_percent = virtual_gain / (buying_price * quantity) * 100;
-
-                                                var capitalGain = parseFloat($(this).find('[data-totalGain]').data('totalgain'));
-                                                var virtual_gain_loose_gain = 'gain';
-                                                if (virtual_gain<0) {
-                                                    virtual_gain_loose_gain='loose';
-                                                }
-                                                $(this).find('td[data-virtual_gain_price] span.virtual_gain_price').html(Math.round((virtual_gain * 100) / 100));
-                                                $(this).find('td[data-virtual_gain_price]').data('virtual_gain_price', Math.round((virtual_gain * 100) / 100));
-                                                $(this).find('td[data-virtual_gain_price]').removeClass('gain loose');
-                                                $(this).find('td[data-virtual_gain_price]').addClass(virtual_gain_loose_gain);
-
-                                                $(this).find('td[data-virtual_gain_percent] span.virtual_gain_percent').html(Math.round((virtual_gain_percent * 100) / 100));
-                                                $(this).find('td[data-virtual_gain_percent]').data('virtual_gain_percent', Math.round((virtual_gain_percent * 100) / 100));
-                                                $(this).find('td[data-virtual_gain_percent]').removeClass('gain loose');
-                                                $(this).find('td[data-virtual_gain_percent]').addClass(virtual_gain_loose_gain);
-
-                                                var gain = virtual_gain + capitalGain;
-                                                var gain_percent = gain / (buying_price * quantity) * 100;
-                                                var gain_loose_gain = 'gain';
-                                                if (gain<0) {
-                                                    gain_loose_gain='loose';
-                                                }
-                                                $(this).find('td[data-gain_price] span.gain_price').html(Math.round((gain * 100) / 100));
-                                                $(this).find('td[data-gain_price]').data('gain_price', Math.round((gain * 100) / 100));
-                                                $(this).find('td[data-gain_price]').removeClass('gain loose');
-                                                $(this).find('td[data-gain_price]').addClass(gain_loose_gain);
-
-                                                $(this).find('td[data-gain_percent] span.gain_percent').html(Math.round((gain_percent * 100) / 100));
-                                                $(this).find('td[data-gain_percent]').data('gain_percent', Math.round((gain_percent * 100) / 100));
-                                                $(this).find('td[data-gain_percent]').removeClass('gain loose');
-                                                $(this).find('td[data-gain_percent]').addClass(gain_loose_gain);
-
-                                                reloadPortfolioTotal($(this).parents('table'));
-
-                                             });
+                                            updateShareLine(share.symbol, current_price);
                                          }
 
                                          share_count--;
 
                                          if (0==share_count)  {
-                                             $().toastmessage('showSuccessToast', "Prices updated");
+//                                             $().toastmessage('showSuccessToast', "Prices updated");
                                          }
 
 
@@ -216,12 +186,74 @@
                     });
                 }
                 
+                function updateShareLine(symbol, current_price) {
+                    $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
+                        // Set current price
+                        $(this).find('[data-current_unit_price]').data('current_unit_price', current_price);
+                        $(this).find('[data-current_unit_price]').html(current_price);
+                        
+                        // Retrieve values
+                        var capital = parseFloat($(this).find('[data-capital]').data('capital'));
+                        var buying_price = parseFloat($(this).find('[data-buying_unit_price]').data('buying_unit_price'));
+                        var quantity = parseInt($(this).find('[data-quantity]').data('quantity'));
+                        var share_fee_fixed = parseFloat($(this).data('portfolio_share_fee_fixed'));
+                        var share_fee_percent = parseFloat($(this).data('portfolio_share_fee_percent'));
+                        var gain_price = parseFloat($(this).find('[data-gain_price]').data('gain_price'));
+                        
+                        // Calculate
+                        var virtual_capital = (current_price * quantity * (1-share_fee_percent)) - share_fee_fixed;
+                        var virtual_capital_gain = virtual_capital - capital;
+                        var virtual_gain_percent = virtual_capital_gain / capital * 100;
+                        var overall_gain = virtual_capital_gain + gain_price;
+                        var overall_percent = overall_gain / capital * 100;
+
+                        if (debug) {
+                            console.log('Symbol : ' + symbol);
+                            console.log('capital : ' + capital);
+                            console.log('buying_price : ' + buying_price);
+                            console.log('quantity : ' + quantity);
+                            console.log('share_fee_fixed : ' + share_fee_fixed);
+                            console.log('share_fee_percent : ' + share_fee_percent);
+                            console.log('gain_price : ' + gain_price);
+                            console.log('virtual_capital : ' + virtual_capital);
+                            console.log('virtual_capital_gain : ' + virtual_capital_gain);
+                            console.log('virtual_gain_percent : ' + virtual_gain_percent);
+                            console.log('overall_gain : ' + overall_gain);
+                            console.log('overall_percent : ' + overall_percent);
+                        }
+
+
+                        // Set Virtual capital
+                        $(this).find('[data-virtual_capital]').data('virtual_capital', virtual_capital);
+                        $(this).find('[data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
+                        
+                        
+                        // Set Virtual capital gain
+                        $(this).find('[data-virtual_capital_gain]').data('virtual_capital_gain', virtual_capital_gain);
+                        $(this).find('[data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100) / 100));
+                        
+                        // Set Virtual capital gain percent
+                        $(this).find('[data-virtual_gain_percent]').data('virtual_gain_percent', virtual_gain_percent);
+                        $(this).find('[data-virtual_gain_percent]').html(Math.round((virtual_gain_percent * 100) / 100));
+
+                        // Set overall gain
+                        $(this).find('[data-overall_gain]').data('overall_gain', overall_gain);
+                        $(this).find('[data-overall_gain]').html(Math.round((overall_gain * 100) / 100));
+                        
+                        // Set overall percent
+                        $(this).find('[data-overall_percent]').data('overall_percent', overall_percent);
+                        $(this).find('[data-overall_percent]').html(Math.round((overall_percent * 100) / 100));
+                    });
+                }
+                
 
 
                 reloadShare();
                 window.setInterval(function(){
-                    reloadShare();
-                }, 30000);
+                    if (!isActive()) {
+                        reloadShare();
+                    }
+                }, 300000);
 
 
             });
@@ -279,6 +311,7 @@
         </div>
         
         <pre>
+            @TODO : Add tooltips for long table
             @TODO : Shares -> Get number of year for action
             @TODO : Shares -> Get % of dividend per share
             @TODO : Shares -> Add color

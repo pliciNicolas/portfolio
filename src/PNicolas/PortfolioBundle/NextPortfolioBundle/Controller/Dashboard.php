@@ -38,20 +38,16 @@ class Dashboard {
 			$webservice->set($webservice_item['id'], $webservice_item['name'], $webservice_item['url']);
 			$webservices[$webservice_item['id']] = $webservice;
 		}
-//		
-//		$user_webservices = [];
-//		if (!(array_key_exists('user_webservice', $data) && is_array($data['user_webservice']) && 0<count($data['user_webservice']))) {
-//			throw new Exception('Cant find user_webservice in data file');
-//		}
-//		foreach($data['user_webservice'] as $user_webservicee_item) {
-//			$user_webservice = new User_Webservice();
-//			$user_webservice->set($webservices[$user_webservicee_item['id_webservice']], $user_webservicee_item['token'], $user_webservicee_item['api_key']);
-//                        if (!array_key_exists($user_webservicee_item['id_user'], $user_webservices)) {
-//                            $user_webservices[$user_webservicee_item['id_user']] = [];
-//                        }
-//			$user_webservices[$user_webservicee_item['id_user']][$user_webservicee_item['id_webservice']] = $user_webservice;
-//		}
-//		
+		
+		$user_webservices = [];
+		if (!(array_key_exists('user_webservice', $data) && is_array($data['user_webservice']) && 0<count($data['user_webservice']))) {
+			throw new Exception('Cant find user_webservice in data file');
+		}
+		
+		foreach($data['user_webservice'] as $user_webservicee_item) {
+			$webservices[$user_webservicee_item['id_webservice']]->setUrlParameters($user_webservicee_item['api_key'], $user_webservicee_item['token']);
+		}
+		
 		$markets = [];
 		if (!(array_key_exists('market', $data) && is_array($data['market']) && 0<count($data['market']))) {
 			throw new Exception('Cant find market in data file');
