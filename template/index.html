@@ -206,10 +206,11 @@
                 }
                 
                 function updateShareTableTotal(symbol) {
-                    $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
-                        
+
+                    $("tbody tr[data-share_symbol='"+symbol+"']").each(function () {
                         // Search table to get sum
                         $(this).parents('table').each(function () {
+$(this).hide();
                             // Init data
                             var capital = 0;
                             var quantity = 0;
