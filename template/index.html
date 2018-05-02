@@ -10,6 +10,8 @@
 
         <link href="asset/css/jquery-ui.css" rel="stylesheet">
         <link href="asset/css/portfolio.css" rel="stylesheet">
+        
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
 
         <!-- From https://jqueryui.com/tabs/ -->
 
@@ -168,18 +170,22 @@
                         var overall_percent = overall_gain / capital * 100;
 
                         if (debug) {
-                            console.log('Symbol : ' + symbol);
-                            console.log('capital : ' + capital);
-                            console.log('buying_price : ' + buying_price);
-                            console.log('quantity : ' + quantity);
-                            console.log('share_fee_fixed : ' + share_fee_fixed);
-                            console.log('share_fee_percent : ' + share_fee_percent);
-                            console.log('gain_price : ' + gain_price);
-                            console.log('virtual_capital : ' + virtual_capital);
-                            console.log('virtual_capital_gain : ' + virtual_capital_gain);
-                            console.log('virtual_gain_percent : ' + virtual_gain_percent);
-                            console.log('overall_gain : ' + overall_gain);
-                            console.log('overall_percent : ' + overall_percent);
+                            var debug_values = {
+                                'Method ' : 'updateShareLine'
+                                , 'symbol' : symbol
+                                , 'capital' : capital
+                                , 'buying_price' : buying_price
+                                , 'quantity' : quantity
+                                , 'share_fee_fixed' : share_fee_fixed
+                                , 'share_fee_percent' : share_fee_percent
+                                , 'gain_price' : gain_price
+                                , 'virtual_capital' : virtual_capital
+                                , 'virtual_capital_gain' : virtual_capital_gain
+                                , 'virtual_gain_percent' : virtual_gain_percent
+                                , 'overall_gain' : overall_gain
+                                , 'overall_percent' : overall_percent
+                            };
+                            console.log(debug_values);  
                         }
 
 
@@ -210,7 +216,6 @@
                     $("tbody tr[data-share_symbol='"+symbol+"']").each(function () {
                         // Search table to get sum
                         $(this).parents('table').each(function () {
-$(this).hide();
                             // Init data
                             var capital = 0;
                             var quantity = 0;
@@ -219,11 +224,11 @@ $(this).hide();
                             var gain_price = 0;
                             var virtual_capital = 0;
                             $(this).find('tbody tr').each(function() {
-                                capital += parseFloat($(this).find('[data-capital]').data('capital'));
-                                quantity += parseInt($(this).find('[data-quantity]').data('quantity'));
+                                capital += parseFloat($(this).data('capital'));
+                                quantity += parseInt($(this).data('quantity'));
                                 share_fee_fixed += parseFloat($(this).data('portfolio_share_fee_fixed'));
                                 share_fee_percent += parseFloat($(this).data('portfolio_share_fee_percent')) * capital;
-                                gain_price += parseFloat($(this).find('[data-gain_price]').data('gain_price'));
+                                gain_price += parseFloat($(this).data('gain_price'));
                                 virtual_capital += parseFloat($(this).find('[data-virtual_capital]').data('virtual_capital'));
                             });
                             // Calculate
@@ -231,7 +236,25 @@ $(this).hide();
                             var virtual_gain_percent = virtual_capital_gain / capital * 100;
                             var overall_gain = virtual_capital_gain + gain_price;
                             var overall_percent = overall_gain / capital * 100;
-  
+
+                            if (debug) {
+                                var debug_values = {
+                                    'Method ' : 'updateShareTableTotal'
+                                    , 'symbol' : symbol
+                                    , 'capital' : capital
+                                    // , 'buying_price' : buying_price
+                                    , 'quantity' : quantity
+                                    , 'share_fee_fixed' : share_fee_fixed
+                                    , 'share_fee_percent' : share_fee_percent
+                                    , 'gain_price' : gain_price
+                                    , 'virtual_capital' : virtual_capital
+                                    , 'virtual_capital_gain' : virtual_capital_gain
+                                    , 'virtual_gain_percent' : virtual_gain_percent
+                                    , 'overall_gain' : overall_gain
+                                    , 'overall_percent' : overall_percent
+                                };
+                                console.log(debug_values);  
+                            }  
                             // Set Virtual capital
                             $(this).find('tfoot [data-virtual_capital]').data('virtual_capital', virtual_capital);
                             $(this).find('tfoot [data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
@@ -260,7 +283,7 @@ $(this).hide();
                 reloadShare();
                 window.setInterval(function(){
                     reloadShare();
-                }, 30000);
+                }, 300000);
 
 
             });
@@ -282,10 +305,13 @@ $(this).hide();
                 
                 // Order shares by name
                 $share_by_name = [];
+                $sharetotal = [];
                 foreach($templateVar['user']->shares as $user_share) {
                     $share_by_name[$user_share->share->name] = $user_share;
+                    $sharetotal[$user_share->share->name] = $user_share->total;
                 }
                 ksort($share_by_name);
+                ksort($sharetotal);
                 
                 ?>
                 <ul>
@@ -301,7 +327,13 @@ $(this).hide();
 
                 <div id="tab-share-resume" class="share" >
                     <?php
-                    include __DIR__.'/share_resume.inc.html';
+                        $type = 'share';
+                        $datasTable = $sharetotal;
+                        $datasTotal = $templateVar['user']->total;
+
+                        include __DIR__.'/share.inc.html';
+
+                        //include __DIR__.'/share_resume.inc.html';
                     ?>
                 </div>
                 <?php 
@@ -309,7 +341,10 @@ $(this).hide();
                 ?>
                 <div id="tab-share-<?php echo $user_share->share->id;?>" class="share <?php echo $name.($user_share->isActive()?'active':'inactive');?>" >
                     <?php
-                    include __DIR__.'/share.inc.html';
+                        $type = 'portfolio';
+                        $datasTable = $user_share->portfolios;
+                        $datasTotal = $user_share->total;
+                        include __DIR__.'/share.inc.html';
                     ?>
                 </div>
                 <?php 
@@ -322,13 +357,36 @@ $(this).hide();
                 ?>
             </div>
         </div>
+        <div class="legend">
+            <h1>Legend</h1>
+            <ul>
+                <li> <i class="fas fa-gift"></i> Dividend</li>
+                <li> <i class="far fa-money-bill-alt"></i> Price</li>
+                <li> <i class="fas fa-list-ol"></i> Count/Quantity</li>
+                <li> <i class="far fa-compass"></i> Average</li>
+                <li> <i class="fas fa-percent"></i> Percent</li>
+                <li> <i class="far fa-calendar"></i> Per year</li>
+                <li> <i class="far fa-calendar-alt"></i> Holding</li>
+                <li> <i class="far fa-handshake"></i> Capital gain</li>
+                <li> <i class="fas fa-trophy"></i> Gain</li>
+                <li> <i class="fas fa-balance-scale"></i> Balance</li>
+                <li> <i class="fas fa-piggy-bank"></i> Capital</li>
+                <li> <i class="fas fa-shopping-cart"></i> Buying unit price</li>
+                <li> <i class="far fa-clock"></i> Current price</li>
+                <li> <i class="fas fa-cloud"></i> Virtual</li>
+                <li> <i class="fas fa-flag-checkered"></i> Overall gain</li>
+            </ul>
+        </div>
         
         <pre>
-            @TODO : Shares -> Resumes
+            @TODO : Shares -> Resumes -> Total
+            @TODO : Style legend
+            @TODO : Make 1 only share file and set field to display
             @TODO : Portfolios -> 1 page per portfolio
             @TODO : Portfolios -> 1 page per portfolio active  /unactive
             @TODO : Portfolios -> Resumes
             @TODO : Portfolios -> Add cash / balance
+            @TODO : Check all datas
             @TODO : Benchmark
             @TODO : Shares -> Add color
             @TODO : Hsitoric -> Add color

@@ -42,23 +42,47 @@ class User_Share_Line {
     public $capital = 0; // $quantity * $unit_price	
 
     
+	/**
+	 * Add transaction
+	 * @param \Transaction $transaction
+	 */
+	public function addTransaction(\Transaction $transaction) {
+		switch($transaction->type) {
+			case Transaction::TYPE_BUY : 
+				$this->addBuy($transaction->unit_price, $transaction->quantity, $transaction->fee_fixed, $transaction->fee_percent, $transaction->date);
+				break;
+			case Transaction::TYPE_SELL : 
+				$this->addSell($transaction->unit_price, $transaction->quantity, $transaction->fee_fixed, $transaction->fee_percent, $transaction->date);
+				break;
+			case Transaction::TYPE_DIVIDEND : 
+				$dividend = $this->unit_price * $this->quantity;
+				$this->addDividend($dividend);
+				break;
+		}
+	}
 
     /**
      * Add a dividend operation
      * @param float $dividend
      */
-    public function addDividend($dividend) {
+    protected function addDividend($dividend) {
         $this->dividend_price += $dividend;
         $this->dividend_count += 1;
         $this->dividend_average = round($this->dividend_price / $this->dividend_count, 2);
         $this->dividend_capital += $this->capital;
-        $this->dividend_percent = round($this->dividend_price / $this->dividend_capital, 2);
+		if ($this->dividend_capital) {
+			$this->dividend_percent = round($this->dividend_price / $this->dividend_capital, 2);
+		}
         $this->dividend_quantity += $this->quantity;
-        $this->dividend_per_share_per_year = round($this->dividend_price / $this->dividend_quantity / $this->getYearHolding(), 2);
+		if ($this->getYearHolding()) {
+			$this->dividend_per_share_per_year = round($this->dividend_price / $this->dividend_quantity / $this->getYearHolding(), 2);
+		}
         
 		$this->gain_price = $this->dividend_price + $this->capitalGain_price;
 		$this->gain_capital += $dividend;
-		$this->gain_percent = round($this->gain_price / $this->gain_capital * 100 , 2); 
+		if ($this->gain_capital) {
+			$this->gain_percent = round($this->gain_price / $this->gain_capital * 100 , 2); 
+		}
         $this->balance += $dividend;
     }
 	
@@ -67,6 +91,9 @@ class User_Share_Line {
 	 * @return int
 	 */
 	protected function getYearHolding() {
+		if (is_null($this->date_last_first_buying)) {
+			return 0;
+		}
 		if (is_null($this->date_holding)) {
 			$now = new DateTime();
 			$diff = $this->date_last_first_buying->diff($now);
@@ -83,7 +110,7 @@ class User_Share_Line {
 			$data = $this->date_last_first_buying->diff($now);
 		}
 		
-		return $data->format('%Y years %m months %d days');
+		return $data->format('%YY %mM %dD');
 	}
 			
 
@@ -94,7 +121,7 @@ class User_Share_Line {
      * @param float $fee_fixed
      * @param float $fee_percent
      */
-    public function addSell($unit_price, $quantity, $fee_fixed, $fee_percent, $date) {
+    protected function addSell($unit_price, $quantity, $fee_fixed, $fee_percent, $date) {
 
         $fee = $fee_fixed + round($fee_percent * $quantity * $unit_price, 2);
         $price = ($unit_price * $quantity) - $fee;
@@ -102,7 +129,9 @@ class User_Share_Line {
         $this->capitalGain_price += ($unit_price - $this->unit_price) * $quantity - $fee;
         $this->capitalGain_count++;
         $this->capitalGain_capital += $this->capital;
-        $this->capitalGain_percent = round($this->capitalGain_price / $this->capitalGain_capital * 100, 2);
+		if( $this->capitalGain_capital ) {
+			$this->capitalGain_percent = round($this->capitalGain_price / $this->capitalGain_capital * 100, 2);
+		}
         
 		$this->gain_price = $this->dividend_price + $this->capitalGain_price;
 		$this->gain_capital += $price;
@@ -135,7 +164,7 @@ class User_Share_Line {
      * @param float $fee_percent
      * @param DateTime $date
      */
-    public function addBuy($unit_price, $quantity, $fee_fixed, $fee_percent, $date) {
+    protected function addBuy($unit_price, $quantity, $fee_fixed, $fee_percent, $date) {
         if (is_null($this->date_last_first_buying)) {
             $this->date_last_first_buying = $date;
         }
@@ -159,4 +188,17 @@ class User_Share_Line {
 		
 		$this->capital = $this->unit_price * $this->quantity;
     }
+	
+	/**
+	 * Get name of portfolio / share
+	 * @param string $type
+	 * @return string
+	 */
+	public function getName($type) {
+		if ('portfolio' == $type) {
+			return $this->portfolio->name;
+		}
+		
+		return $this->share->name;
+	}
 }
