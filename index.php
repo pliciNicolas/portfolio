@@ -25,10 +25,9 @@ try {
 	$dashboard->setUser($user);
 	
 	$dashboard->loadData();
-
 	
 	$templateVar = [];
-	$templateVar['user'] = $user;
+	$templateVar['user'] = $dashboard->user;
 	
 } catch (Exception $ex) {
 	echo $ex->getMessage();

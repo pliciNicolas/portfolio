@@ -55,7 +55,7 @@ class User_Share_Line {
 				$this->addSell($transaction->unit_price, $transaction->quantity, $transaction->fee_fixed, $transaction->fee_percent, $transaction->date);
 				break;
 			case Transaction::TYPE_DIVIDEND : 
-				$dividend = $this->unit_price * $this->quantity;
+				$dividend = $transaction->unit_price * $transaction->quantity;
 				$this->addDividend($dividend);
 				break;
 		}
@@ -104,6 +104,9 @@ class User_Share_Line {
 	}
 	
 	public function getHolding() {
+		if (is_null($this->date_last_first_buying)) {
+			return '';
+		}
 		$data = $this->date_holding;
 		if (is_null($this->date_holding)) {
 			$now = new DateTime();
