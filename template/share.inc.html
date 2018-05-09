@@ -30,15 +30,15 @@
         foreach ($datasTable as $user_share_line) {
         ?>
         <tr 
-            data-id_share="<?php echo $user_share->share->id; ?>"
-            data-share_symbol="<?php echo $user_share->share->symbol; ?>"
+            data-id_share="<?php echo $user_share_line->share->id; ?>"
+            data-share_symbol="<?php echo $user_share_line->share->symbol; ?>"
             data-portfolio_share_fee_fixed="<?php echo (isset($user_share_line->portfolio->fee_fixed)?$user_share_line->portfolio->fee_fixed:0); ?>"
             data-portfolio_share_fee_percent="<?php echo (isset($user_share_line->portfolio->fee_percent)?$user_share_line->portfolio->fee_percent:0); ?>"
             data-quantity="<?php echo $user_share_line->quantity; ?>"
             data-capital="<?php echo $user_share_line->capital; ?>"
             data-share_openmarket="<?php echo $user_share_line->share->market->openHours; ?>"
             data-share_active="<?php echo ($user_share_line->quantity?'active':'unactive'); ?>"
-            data-share_url="<?php echo $user_share_line->share->market->webservice->getUrl($user_share->share->symbol); ?>"
+            data-share_url="<?php echo $user_share_line->share->market->webservice->getUrl($user_share_line->share->symbol); ?>"
             data-gain_price="<?php echo $user_share_line->gain_price; ?>"
             data-buying_unit_price="<?php echo $user_share_line->unit_price; ?>"
             >
