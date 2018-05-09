@@ -12,3 +12,16 @@ tfoot {
 body .tablesorter-default tfoot tr td {
     border-top: 1px #808080 dashed;
 }
+#tab-share-resume .dividend_count,
+#tab-share-resume .dividend_average,
+#tab-share-resume .dividend_percent,
+#tab-share-resume .dividend_per_year,
+#tab-share-resume .holding,
+#tab-share-resume .capital_gain_count,
+#tab-share-resume .capital_gain_percent,
+#tab-share-resume .gain_percent,
+#tab-share-resume .capital,
+#tab-share-resume .buying_unit_price,
+#tab-share-resume .virtual_capital {
+    display: none;
+}
