@@ -51,12 +51,12 @@ class User {
 		// Set by portfolio 
 		if (!array_key_exists($transaction->portfolio->id, $this->portfolios)) {
 			$this->portfolios[$transaction->portfolio->id] = new User_Portfolio();
-			$this->portfolios[$transaction->portfolio->id]->portfolios = $transaction->portfolio;
+			$this->portfolios[$transaction->portfolio->id]->portfolio = $transaction->portfolio;
 			$this->portfolios[$transaction->portfolio->id]->total = new User_Share_Line();
 			$this->portfolios[$transaction->portfolio->id]->total->portfolio = $transaction->portfolio;
 		}
 		
-		if (!array_key_exists($transaction->share->id, $this->portfolios[$transaction->portfolio->id]->portfolios)) {
+		if (!array_key_exists($transaction->share->id, $this->portfolios[$transaction->portfolio->id])) {
 			$this->portfolios[$transaction->portfolio->id]->shares[$transaction->share->id] = new User_Share_Line();
 			$this->portfolios[$transaction->portfolio->id]->shares[$transaction->share->id]->share = $transaction->share;
 			$this->portfolios[$transaction->portfolio->id]->shares[$transaction->share->id]->portfolio = $transaction->portfolio;

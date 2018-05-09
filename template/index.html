@@ -384,9 +384,61 @@
         <h1>Bonjour <?php echo $templateVar['user']->name; ?></h1>
         <div class="tabs">
             <ul>
+                <li><a href="#tab-portfolios">Portfolios</a></li>
                 <li><a href="#tab-shares">Shares</a></li>
                 <li><a href="#tab-historic">Historic</a></li>
             </ul>
+            
+            <div id="tab-portfolios" class='tabs'>
+                <?php
+
+                // Order portfolios by name
+                $portfolios_by_name = [];
+                $portfoliosTotal = [];
+                foreach($templateVar['user']->portfolios as $user_portfolio) {
+                    $portfolios_by_name[$user_portfolio->portfolio->name] = $user_portfolio;
+                    $portfoliosTotal[$user_portfolio->portfolio->name] = $user_portfolio->total;
+                }
+                ksort($portfolios_by_name);
+                ksort($portfoliosTotal);
+                ?>
+                
+                <ul>
+                    <li><a href="#tab-portfolio-resume">Resume</a></li>
+                    <?php 
+                    foreach($portfolios_by_name as $name => $user_share) {
+                    ?>
+                    <li><a href="#tab-portfolio-<?php echo $user_share->portfolio->id;?>"><?php echo $name;?></a></li>
+                    <?php 
+                    }
+                    ?>
+                </ul>
+                
+                <div id="tab-portfolio-resume" class="portfolio" >
+                    <?php
+                        $type = 'portfolio';
+                        $datasTable = $portfoliosTotal;
+                        $datasTotal = $templateVar['user']->total;
+                        $currency = '€';
+                        //include __DIR__.'/share.inc.html';
+                    ?>
+                </div>
+                
+                <?php 
+                foreach($portfolios_by_name as $name => $user_share) {
+                ?>
+                <div id="tab-portfolio-<?php echo $user_share->portfolio->id;?>" class="portfolio <?php echo $name;?>" >
+                    <?php
+                        $type = 'share';
+                        $datasTable = $user_share->shares;
+                        $datasTotal = $user_share->total;
+                        include __DIR__.'/share.inc.html';
+                    ?>
+                </div>
+                <?php 
+                }
+                ?>
+            </div>
 
             <div id="tab-shares" class='tabs'>
                 <?php
@@ -467,7 +519,15 @@
         <pre>
             @TODO : Portofolios -> 1 page per portfolio
             @TODO : Portofolios -> 1 page resume
-            @TODO : Swap to https://fr.tradingview.com/rest-api-spec/
+            @TODO : Swap to https://fr.tradingview.com/rest-api-spec/ 
+                https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH&tsyms=EUR 
+                https://www.programmableweb.com/news/70-exchange-apis-bitcoin-status-hashrack-and-kraken/2013/11/12 
+                https://blockchain.info/fr/api/exchange_rates_api
+                https://docs.gdax.com/
+                https://developers.coinbase.com/api/v2#get-spot-price
+                https://www.coinigy.com/bitcoin-api/
+                https://www.coinapi.io/
+                https://www.cryptocompare.com/api/#-api-data-coinlist-
             @TODO : Shares -> Add current exchange
             @TODO : Add new portfolio
             @TODO : Portofolios -> Add cash available
