@@ -125,14 +125,16 @@
                                         } else {
                                             updateShareLine(share.symbol, current_price);
                                             updateShareTableTotal(share.symbol);
-                                         }
+                                            
+                                            share_count--;
 
-                                         share_count--;
+                                            if (0==share_count)  {
+                                                $().toastmessage('showSuccessToast', "Prices updated");
+                                                setActive(false);
+                                            }
+                                        }
 
-                                         if (0==share_count)  {
-                                             $().toastmessage('showSuccessToast', "Prices updated");
-                                             setActive(false);
-                                         }
+
 
 
                                     })
@@ -148,66 +150,72 @@
                     });
                 }
                 
+                function getShareLineInfo(tr, current_price) {
+                    // Retrieve values
+                    var data = (tr).data();
+
+                    data.capital = parseFloat(data.capital);
+                    data.buying_price = parseFloat(data.buying_unit_price);
+                    data.quantity = parseInt(data.quantity);
+                    data.share_fee_fixed = parseFloat(data.portfolio_share_fee_fixed);
+                    data.share_fee_percent = parseFloat(data.portfolio_share_fee_percent);
+                    data.gain_price = parseFloat(data.gain_price);
+
+                    // Calculate
+                    data.virtual_capital = (current_price * data.quantity * (1-data.share_fee_percent)) - data.share_fee_fixed;
+                    data.virtual_capital_gain = data.virtual_capital - data.capital;
+                    data.virtual_gain_percent = data.virtual_capital_gain / data.capital * 100;
+                    data.overall_gain = data.virtual_capital_gain + data.gain_price;
+                    data.overall_percent = data.overall_gain / data.capital * 100;
+
+                    return data;
+                }
+                
                 function updateShareLine(symbol, current_price) {
                     $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
+
                         // Set current price
                         $(this).find('[data-current_unit_price]').data('current_unit_price', current_price);
                         $(this).find('[data-current_unit_price]').html(current_price);
                         
-                        // Retrieve values
-                        var capital = parseFloat($(this).data('capital'));
-                        var buying_price = parseFloat($(this).data('buying_unit_price'));
-                        var quantity = parseInt($(this).data('quantity'));
-                        var share_fee_fixed = parseFloat($(this).data('portfolio_share_fee_fixed'));
-                        var share_fee_percent = parseFloat($(this).data('portfolio_share_fee_percent'));
-                        var gain_price = parseFloat($(this).data('gain_price'));
-                        
-                        // Calculate
-                        var virtual_capital = (current_price * quantity * (1-share_fee_percent)) - share_fee_fixed;
-                        var virtual_capital_gain = virtual_capital - capital;
-                        var virtual_gain_percent = virtual_capital_gain / capital * 100;
-                        var overall_gain = virtual_capital_gain + gain_price;
-                        var overall_percent = overall_gain / capital * 100;
-
+                        var shareInfo = getShareLineInfo($(this), current_price);
                         if (debug) {
-                            var debug_values = {
-                                'Method ' : 'updateShareLine'
-                                , 'symbol' : symbol
-                                , 'capital' : capital
-                                , 'buying_price' : buying_price
-                                , 'quantity' : quantity
-                                , 'share_fee_fixed' : share_fee_fixed
-                                , 'share_fee_percent' : share_fee_percent
-                                , 'gain_price' : gain_price
-                                , 'virtual_capital' : virtual_capital
-                                , 'virtual_capital_gain' : virtual_capital_gain
-                                , 'virtual_gain_percent' : virtual_gain_percent
-                                , 'overall_gain' : overall_gain
-                                , 'overall_percent' : overall_percent
-                            };
-                            console.log(debug_values);  
+                            shareInfo.method = 'updateShareLine';
+                            console.log(shareInfo);
+                        }
+                        
+                        var virtual_capital_gain_lg = "loose";
+                        if (0 < shareInfo.virtual_capital_gain) {
+                            virtual_capital_gain_lg = "gain";
+                        }
+                        var overall_capital_lg = "loose";
+                        if (0 < shareInfo.overall_gain) {
+                            overall_capital_lg = "gain";
                         }
 
-
                         // Set Virtual capital
-                        $(this).find('[data-virtual_capital]').data('virtual_capital', virtual_capital);
-                        $(this).find('[data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
+                        $(this).find('[data-virtual_capital]').data('virtual_capital', shareInfo.virtual_capital);
+                        $(this).find('[data-virtual_capital]').html(Math.round((shareInfo.virtual_capital * 100) / 100));
                         
                         // Set Virtual capital gain
-                        $(this).find('[data-virtual_capital_gain]').data('virtual_capital_gain', virtual_capital_gain);
-                        $(this).find('[data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100) / 100));
+                        $(this).find('[data-virtual_capital_gain]').data('virtual_capital_gain', shareInfo.virtual_capital_gain);
+                        $(this).find('[data-virtual_capital_gain]').html(Math.round((shareInfo.virtual_capital_gain * 100) / 100));
+                        $(this).find('[data-virtual_capital_gain]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
                         
                         // Set Virtual capital gain percent
-                        $(this).find('[data-virtual_gain_percent]').data('virtual_gain_percent', virtual_gain_percent);
-                        $(this).find('[data-virtual_gain_percent]').html(Math.round((virtual_gain_percent * 100) / 100));
+                        $(this).find('[data-virtual_gain_percent]').data('virtual_gain_percent', shareInfo.virtual_gain_percent);
+                        $(this).find('[data-virtual_gain_percent]').html(Math.round((shareInfo.virtual_gain_percent * 100) / 100));
+                        $(this).find('[data-virtual_gain_percent]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
 
                         // Set overall gain
-                        $(this).find('[data-overall_gain]').data('overall_gain', overall_gain);
-                        $(this).find('[data-overall_gain]').html(Math.round((overall_gain * 100) / 100));
+                        $(this).find('[data-overall_gain]').data('overall_gain', shareInfo.overall_gain);
+                        $(this).find('[data-overall_gain]').html(Math.round((shareInfo.overall_gain * 100) / 100));
+                        $(this).find('[data-overall_gain]').parent().attr('data-loose_gain',overall_capital_lg);
                         
                         // Set overall percent
-                        $(this).find('[data-overall_percent]').data('overall_percent', overall_percent);
-                        $(this).find('[data-overall_percent]').html(Math.round((overall_percent * 100) / 100));
+                        $(this).find('[data-overall_percent]').data('overall_percent', shareInfo.overall_percent);
+                        $(this).find('[data-overall_percent]').html(Math.round((shareInfo.overall_percent * 100) / 100));
+                        $(this).find('[data-overall_percent]').parent().attr('data-loose_gain',overall_capital_lg);
                     });
                 }
                 
@@ -224,13 +232,18 @@
                             var gain_price = 0;
                             var virtual_capital = 0;
                             $(this).find('tbody tr').each(function() {
-                                capital += parseFloat($(this).data('capital'));
-                                quantity += parseInt($(this).data('quantity'));
-                                share_fee_fixed += parseFloat($(this).data('portfolio_share_fee_fixed'));
-                                share_fee_percent += parseFloat($(this).data('portfolio_share_fee_percent')) * capital;
-                                gain_price += parseFloat($(this).data('gain_price'));
-                                virtual_capital += parseFloat($(this).find('[data-virtual_capital]').data('virtual_capital'));
+                                var shareInfo = getShareLineInfo($(this), 0);
+                                capital += parseFloat(shareInfo.capital);
+                                quantity += parseInt(shareInfo.quantity);
+                                share_fee_fixed += parseFloat(shareInfo.portfolio_share_fee_fixed);
+                                share_fee_percent += parseFloat(shareInfo.portfolio_share_fee_percent) * capital;
+                                gain_price += parseFloat(shareInfo.gain_price);
+                                var tmp_virtual_capital = parseFloat($(this).find('[data-virtual_capital]').data('virtual_capital'));
+                                if (!isNaN(tmp_virtual_capital)) {
+                                    virtual_capital += tmp_virtual_capital;
+                                }
                             });
+
                             // Calculate
                             var virtual_capital_gain = virtual_capital - capital;
                             var virtual_gain_percent = virtual_capital_gain / capital * 100;
@@ -254,26 +267,34 @@
                                     , 'overall_percent' : overall_percent
                                 };
                                 console.log(debug_values);  
-                            }  
+                            }
+                            
+                            var virtual_capital_gain_lg = "loose";
+                            if (0 < virtual_capital_gain) {
+                                virtual_capital_gain_lg = "gain";
+                            }
+                            var overall_capital_lg = "loose";
+                            if (0 < overall_gain) {
+                                overall_capital_lg = "gain";
+                            }
                             // Set Virtual capital
-                            $(this).find('tfoot [data-virtual_capital]').data('virtual_capital', virtual_capital);
-                            $(this).find('tfoot [data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
+                            $(this).find('tfoot span[data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
 
                             // Set Virtual capital gain
-                            $(this).find('tfoot [data-virtual_capital_gain]').data('virtual_capital_gain', virtual_capital_gain);
                             $(this).find('tfoot [data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100) / 100));
+                            $(this).find('tfoot [data-virtual_capital_gain]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
 
                             // Set Virtual capital gain percent
-                            $(this).find('tfoot [data-virtual_gain_percent]').data('virtual_gain_percent', virtual_gain_percent);
                             $(this).find('tfoot [data-virtual_gain_percent]').html(Math.round((virtual_gain_percent * 100) / 100));
+                            $(this).find('tfoot [data-virtual_gain_percent]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
 
                             // Set overall gain
-                            $(this).find('tfoot [data-overall_gain]').data('overall_gain', overall_gain);
                             $(this).find('tfoot [data-overall_gain]').html(Math.round((overall_gain * 100) / 100));
+                            $(this).find('tfoot [data-overall_gain]').parent().attr('data-loose_gain',overall_capital_lg);
 
                             // Set overall percent
-                            $(this).find('tfoot [data-overall_percent]').data('overall_percent', overall_percent);
                             $(this).find('tfoot [data-overall_percent]').html(Math.round((overall_percent * 100) / 100));
+                            $(this).find('tfoot [data-overall_percent]').parent().attr('data-loose_gain',overall_capital_lg);
                         });
                     });
                 }
@@ -285,6 +306,73 @@
                     reloadShare();
                 }, 300000);
 
+
+                    //http://jsbin.com/OQIZilU/5/edit?html,css,js,output
+                    var safeColors = ['00','33','66','99','cc','ff'];
+                    var rand = function() {
+                        return Math.floor(Math.random()*6);
+                    };
+                    var randomColor = function() {
+                        var r = safeColors[rand()];
+                        var g = safeColors[rand()];
+                        var b = safeColors[rand()];
+                        return "#"+r+g+b;
+                    };
+                    var rnd = function() {
+                        return ("0"+Math.floor(Math.random()*256).toString(16)).substr(-2,2);
+                    };
+                    var rndColor = function() {
+                        var r = rnd();
+                        var g = rnd();
+                        var b = rnd();
+                        return "#"+r+g+b;
+                    };
+                    
+                    // Generate color
+                    var portfolio_colors = {1 : '#003d8e', 2 : '#109f48'};
+                    var share_colors = [];
+                    var share_active = [];
+                    var type_colors = {'BUY' : '#ff8118', 'DIVIDEND' : '#00ff00', 'SELL': '#349933'};
+                    $("#tab-historic tbody tr").each(function () {
+                        var id_share = $(this).data('id_share');
+                        var id_portfolio = $(this).data('id_portfolio');
+                        var type = $(this).data('type');
+                        if (!portfolio_colors.hasOwnProperty(id_portfolio)) {
+                            portfolio_colors[id_portfolio] = randomColor().toUpperCase();
+                        }
+                        if (!share_colors.hasOwnProperty(id_share)) {
+                            share_colors[id_share] = randomColor().toUpperCase();
+                        }
+                        if (!type_colors.hasOwnProperty(type)) {
+                            type_colors[type] = randomColor().toUpperCase();
+                        }
+                    });
+                    
+                    // Fill with color
+                    for(var i in portfolio_colors)
+                    {
+                        $("tbody tr[data-id_portfolio='"+i+"']").each(function () {
+                            $(this).find('.portfolio').each(function() {
+                                $(this).css('color', portfolio_colors[i]);
+                            });
+                        });
+                    }
+                    for(var i in share_colors)
+                    {
+                        $("tbody tr[data-id_share='"+i+"']").each(function () {
+                            $(this).find('.share').each(function() {
+                                $(this).css('color', share_colors[i]);
+                            });
+                        });
+                    }
+                    for(var i in type_colors)
+                    {
+                        $("tbody tr[data-type='"+i+"']").each(function () {
+                            $(this).find('.type').each(function() {
+                                $(this).css('color', type_colors[i]);
+                            });
+                        });
+                    }
 
             });
 
@@ -377,26 +465,25 @@
         </div>
         
         <pre>
-            @TODO : Shares -> Resumes -> Total
-            @TODO : Style legend
-            @TODO : Make 1 only share file and set field to display
-            @TODO : Portfolios -> 1 page per portfolio
-            @TODO : Portfolios -> 1 page per portfolio active  /unactive
-            @TODO : Portfolios -> Resumes
-            @TODO : Portfolios -> Add cash / balance
+            @TODO : Portofolios -> 1 page per portfolio
+            @TODO : Portofolios -> 1 page resume
+            @TODO : Swap to https://fr.tradingview.com/rest-api-spec/
+            @TODO : Shares -> Add current exchange
+            @TODO : Add new portfolio
+            @TODO : Portofolios -> Add cash available
+            @TODO : Portofolios -> 1 page per portfolio active / unactive
+            @TODO : Shares -> Add benchmark
+            @TODO : Portfolios -> Add benchmark
+            @TODO : Legend : Style it
+            @TODO : Historic : Add color (Fix color) and use it in share and portfolio tab
             @TODO : Check all datas
-            @TODO : Benchmark
-            @TODO : Shares -> Add color
-            @TODO : Hsitoric -> Add color
             @TODO : Benchmark : Make an historic
             @TODO : Porfolio : Make an historic
             @TODO : Performances -> Portfolio -> Set graph with benchmark
             @TODO : Order and align table
-            @TODO : Swap to https://fr.tradingview.com/rest-api-spec/
+            @TODO : Split js
         </pre>
 
-        @Monnaie : Etherum / Bitcoin /Ripple
         @Information Ocfx / Coin checkup
-        @Plateforme Kirachan / Bitstamp
     </body>
 </html>

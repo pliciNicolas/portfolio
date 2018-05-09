@@ -18,6 +18,7 @@
         <tr 
             data-id_share="<?php echo $transaction->share->id; ?>"
             data-id_portfolio="<?php echo $transaction->portfolio->id; ?>"
+            data-type="<?php echo $transaction->type; ?>"
         >
             <th class="date"><?php echo $transaction->date->format('d/m/Y'); ?></th>
             <th class="portfolio"><?php echo $transaction->portfolio->name; ?></th>
