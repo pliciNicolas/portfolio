@@ -30,6 +30,9 @@ class Share_Webservice {
 	 * @return string
 	 */
 	static public function get($id_share, $id_webservice) {
+		if (!isset(self::$shares[$id_share][$id_webservice])) {
+			throw new Exception('Can\'t find share '.$id_share.' for webservice '.$id_webservice);
+		}
 		return self::$shares[$id_share][$id_webservice];
 	}
 }

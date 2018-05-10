@@ -18,6 +18,7 @@
             <th class="quantity" title="Quantity"><i class="fas fa-list-ol"></i></th>
             <th class="buying_unit_price" title="Buying unit price"><i class="fas fa-shopping-cart"></i> <i class="far fa-money-bill-alt"></i></th>
             <th class="current_price" title="Current price"><i class="far fa-clock"></i> <i class="far fa-money-bill-alt"></th>
+            <th class="current_change" title="Current change"><i class="far fa-clock"></i> <i class="fas fa-percent"></th>
             <th class="virtual_capital" title="Virtual capital"><i class="fas fa-cloud"></i> <i class="fas fa-piggy-bank"></i> <i class="far fa-money-bill-alt"></i></th>
             <th class="virtual_capital_gain" title="Virtual capital gain"><i class="fas fa-cloud"></i> <i class="fas fa-trophy"></i> <i class="far fa-money-bill-alt"></i></th>
             <th class="virtual_gain_percent" title="Virtual capital percent"><i class="fas fa-cloud"></i> <i class="fas fa-trophy"></i> <i class="fas fa-percent"></i></th>
@@ -38,7 +39,7 @@
             data-quantity="<?php echo $user_share_line->quantity; ?>"
             data-capital="<?php echo $user_share_line->capital; ?>"
             data-share_openmarket="<?php echo (is_null($user_share_line->share)?'':$user_share_line->share->market->openHours); ?>"
-            data-share_active="<?php echo ('portfolio'!=$type && $user_share_line->quantity?'active':'unactive'); ?>"
+            data-share_active="<?php echo $user_share_line->quantity?'active':'unactive'; ?>"
             data-share_url="<?php echo ('portfolio'!=$type?$user_share_line->share->market->webservice->getUrl($user_share_line->share->symbol):''); ?>"
             data-share_webservice="<?php echo ('portfolio'!=$type?$user_share_line->share->market->webservice->codeName:''); ?>"
             data-gain_price="<?php echo $user_share_line->gain_price; ?>"
@@ -134,6 +135,10 @@
             <td class="current_price">
                 <span data-current_unit_price="" class="refresh"></span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
+            </td>
+            <td class="current_percent">
+                <span data-current_percent="" class="refresh"></span>
+                <?php echo ($user_share_line->quantity?'%':'-'); ?>
             </td>
             <td class="virtual_capital">
                 <span data-virtual_capital="" class="refresh"></span>
@@ -256,6 +261,9 @@
                 <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
             </td>
             <td class="current_price">
+                -
+            </td>
+            <td class="current_percent">
                 -
             </td>
             <td data-loose_gain="neutral" class="virtual_capital">

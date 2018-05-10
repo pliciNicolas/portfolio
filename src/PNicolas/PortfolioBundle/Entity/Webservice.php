@@ -40,6 +40,10 @@ class Webservice {
 	 * @return string
 	 */
 	public function getUrl($share_id) {
-		return str_replace('@symbol@', $share_id, $this->url);
+		$replace_data = [
+			'@symbol@' => $share_id
+			,'@date@' => date('Y-m-d')
+		];
+		return str_replace(array_keys($replace_data), array_values($replace_data), $this->url);
 	}
 }

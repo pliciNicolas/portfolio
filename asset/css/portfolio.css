@@ -12,6 +12,18 @@ tfoot {
 body .tablesorter-default tfoot tr td {
     border-top: 1px #808080 dashed;
 }
+
+#tab-portfolio-resume .dividend_count,
+#tab-portfolio-resume .dividend_average,
+#tab-portfolio-resume .dividend_percent,
+#tab-portfolio-resume .dividend_per_year,
+#tab-portfolio-resume .holding,
+#tab-portfolio-resume .capital_gain_count,
+#tab-portfolio-resume .capital_gain_percent,
+#tab-portfolio-resume .gain_percent,
+#tab-portfolio-resume .capital,
+#tab-portfolio-resume .buying_unit_price,
+#tab-portfolio-resume .virtual_capital, 
 #tab-share-resume .dividend_count,
 #tab-share-resume .dividend_average,
 #tab-share-resume .dividend_percent,

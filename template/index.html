@@ -107,26 +107,20 @@
                             var jqxhr = $.ajax(url)
                                     .done(function (msg) {
                                         $(this).price = '';
-//                                        var tmp = msg["Time Series (1min)"];
-//                                        var current_price = null;
-//                                        for (var date in tmp) {
-//                                            if (null == current_price) {
-//                                                current_price = Math.round((tmp[date]["4. close"] * 100) / 100);
-//                                            }
-//                                        }
-                                        tmp_current_price= getApiResult(share.symbol, msg, share.webservice);
-                                        current_price = tmp_current_price.currentPrice;
+
+                                        api_result= getApiResult(share.symbol, msg, share.webservice);
+                                        api_result.symbol = share.symbol;
 
                                         if (debug) {
-                                            console.log(share.symbol + ' : ' + current_price);
+                                            console.log(api_result);
                                         }
                                         
-                                        share.last_price = current_price;
+                                        share.last_price = api_result.currentPrice;
 
-                                        if (null == current_price) {
+                                        if (null == api_result.currentPrice) {
                                             $().toastmessage('showWarningToast', share.symbol + " price is null");
                                         } else {
-                                            updateShareLine(share.symbol, current_price);
+                                            updateShareLine(share.symbol, api_result);
                                             updateShareTableTotal(share.symbol);
                                             
                                             share_count--;
@@ -161,6 +155,9 @@
                         case 'cryptoCompare':
                             return getcryptoCompareResult(symbol, result);
                             break;
+                        case 'quandl':
+                            return getQuandlResult(symbol, result);
+                            break;
                     }
                     $().toastmessage('showErrorToast', "Webservice '"+webservice+"' unnknow");
                     return null;
@@ -179,15 +176,20 @@
                         }
                     }
                     
-                    return {'currentPrice' : current_price, 'change' : (current_price - open_price) / open_price};
+                    return {'currentPrice' : current_price, 'change' : ((current_price - open_price) / open_price * 100)};
                 }
 
+                function getQuandlResult(symbol,result) {
+                    var current_price = result.dataset.data[0][4];
+                    
+                    return {'currentPrice' : current_price, 'change' : ((current_price - result.dataset.data[0][1]) / result.dataset.data[0][1] * 100)};
+                }
                 function getcryptoCompareResult(symbol,result) {
                     var current_price = Math.round((result.RAW[symbol]['EUR']['PRICE'] * 100)) / 100;
                     
-                    return {'currentPrice' : current_price, 'change' : (current_price - result.RAW[symbol]['EUR']['OPEN24HOUR']) / result.RAW[symbol]['EUR']['OPEN24HOUR']};
+                    return {'currentPrice' : current_price, 'change' : ((current_price - result.RAW[symbol]['EUR']['OPEN24HOUR']) / result.RAW[symbol]['EUR']['OPEN24HOUR'] * 100)};
                 }
-                function getShareLineInfo(tr, current_price) {
+                function getShareLineInfo(tr, apiData) {
                     // Retrieve values
                     var data = (tr).data();
 
@@ -199,7 +201,7 @@
                     data.gain_price = parseFloat(data.gain_price);
 
                     // Calculate
-                    data.virtual_capital = (current_price * data.quantity * (1-data.share_fee_percent)) - data.share_fee_fixed;
+                    data.virtual_capital = (apiData.currentPrice * data.quantity * (1-data.share_fee_percent)) - data.share_fee_fixed;
                     data.virtual_capital_gain = data.virtual_capital - data.capital;
                     data.virtual_gain_percent = data.virtual_capital_gain / data.capital * 100;
                     data.overall_gain = data.virtual_capital_gain + data.gain_price;
@@ -208,14 +210,21 @@
                     return data;
                 }
                 
-                function updateShareLine(symbol, current_price) {
+                function updateShareLine(symbol, apiData) {
                     $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
 
                         // Set current price
-                        $(this).find('[data-current_unit_price]').data('current_unit_price', current_price);
-                        $(this).find('[data-current_unit_price]').html(current_price);
+                        $(this).find('[data-current_unit_price]').data('current_unit_price', apiData.currentPrice);
+                        $(this).find('[data-current_unit_price]').html(apiData.currentPrice);
+                        $(this).find('[data-current_percent]').data('current_percent', apiData.change);
+                        $(this).find('[data-current_percent]').html(Math.round(apiData.change * 100) / 100);
+                        var current_percent = "loose";
+                        if (0 < apiData.change) {
+                            current_percent = "gain";
+                        }
+                        $(this).find('[data-current_percent]').parent().attr('data-loose_gain',current_percent);
                         
-                        var shareInfo = getShareLineInfo($(this), current_price);
+                        var shareInfo = getShareLineInfo($(this), apiData);
                         if (debug) {
                             shareInfo.method = 'updateShareLine';
                             console.log(shareInfo);
@@ -570,7 +579,6 @@
                 https://www.cryptocompare.com/api/#-api-data-coinlist-
             @TODO : Manage currency for crypto money
             @TODO : Shares -> Add current exchange
-            @TODO : Add new portfolio
             @TODO : Share line -> Set all data on tr
             @TODO : Portofolios -> Add cash available
             @TODO : Portofolios -> 1 page per portfolio active / unactive
