@@ -56,7 +56,7 @@ class User {
 			$this->portfolios[$transaction->portfolio->id]->total->portfolio = $transaction->portfolio;
 		}
 		
-		if (!array_key_exists($transaction->share->id, $this->portfolios[$transaction->portfolio->id])) {
+		if (!array_key_exists($transaction->share->id, $this->portfolios[$transaction->portfolio->id]->shares)) {
 			$this->portfolios[$transaction->portfolio->id]->shares[$transaction->share->id] = new User_Share_Line();
 			$this->portfolios[$transaction->portfolio->id]->shares[$transaction->share->id]->share = $transaction->share;
 			$this->portfolios[$transaction->portfolio->id]->shares[$transaction->share->id]->portfolio = $transaction->portfolio;
