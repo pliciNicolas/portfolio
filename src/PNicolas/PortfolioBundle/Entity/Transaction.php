@@ -44,7 +44,7 @@ class Transaction {
 		$this->date = $date;
 		$this->share = $share;
 		$this->type = $type;
-		$this->quantity = (int) $quantity;
+		$this->quantity = (float) $quantity;
 		$this->unit_price = (float) $unit_price;
 		$this->fee_fixed = (float) $fee_fixed;
 		$this->fee_percent = (float) $fee_percent;

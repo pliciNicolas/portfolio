@@ -71,6 +71,7 @@
                     share.open_market = $(this).data('share_openmarket');
                     share.last_price = null;
                     share.url = $(this).data('share_url');
+                    share.webservice = $(this).data('share_webservice');
                     share_symbol.push(share);
                 });
                 share_symbol = GetUnique(share_symbol);
@@ -106,13 +107,15 @@
                             var jqxhr = $.ajax(url)
                                     .done(function (msg) {
                                         $(this).price = '';
-                                        var tmp = msg["Time Series (1min)"];
-                                        var current_price = null;
-                                        for (var date in tmp) {
-                                            if (null == current_price) {
-                                                current_price = Math.round((tmp[date]["4. close"] * 100) / 100);
-                                            }
-                                        }
+//                                        var tmp = msg["Time Series (1min)"];
+//                                        var current_price = null;
+//                                        for (var date in tmp) {
+//                                            if (null == current_price) {
+//                                                current_price = Math.round((tmp[date]["4. close"] * 100) / 100);
+//                                            }
+//                                        }
+                                        tmp_current_price= getApiResult(share.symbol, msg, share.webservice);
+                                        current_price = tmp_current_price.currentPrice;
 
                                         if (debug) {
                                             console.log(share.symbol + ' : ' + current_price);
@@ -150,13 +153,47 @@
                     });
                 }
                 
+                function getApiResult(symbol, result, webservice) {
+                    switch (webservice) {
+                        case 'alphaAvantage' : 
+                            return getAlphaAvantageResult(symbol, result);
+                            break;
+                        case 'cryptoCompare':
+                            return getcryptoCompareResult(symbol, result);
+                            break;
+                    }
+                    $().toastmessage('showErrorToast', "Webservice '"+webservice+"' unnknow");
+                    return null;
+                }
+                
+                function getAlphaAvantageResult(symbol, result) {
+                    var tmp = result["Time Series (Daily)"];
+                    var current_price = null;
+                    var open_price = null;
+                    for (var date in tmp) {
+                        if (null == current_price) {
+                            current_price = Math.round((tmp[date]["4. close"] * 100)) / 100;
+                        }
+                        if (null == open_price) {
+                            open_price = Math.round((tmp[date]["1. open"] * 100)) / 100;
+                        }
+                    }
+                    
+                    return {'currentPrice' : current_price, 'change' : (current_price - open_price) / open_price};
+                }
+
+                function getcryptoCompareResult(symbol,result) {
+                    var current_price = Math.round((result.RAW[symbol]['EUR']['PRICE'] * 100)) / 100;
+                    
+                    return {'currentPrice' : current_price, 'change' : (current_price - result.RAW[symbol]['EUR']['OPEN24HOUR']) / result.RAW[symbol]['EUR']['OPEN24HOUR']};
+                }
                 function getShareLineInfo(tr, current_price) {
                     // Retrieve values
                     var data = (tr).data();
 
                     data.capital = parseFloat(data.capital);
                     data.buying_price = parseFloat(data.buying_unit_price);
-                    data.quantity = parseInt(data.quantity);
+                    data.quantity = parseFloat(data.quantity);
                     data.share_fee_fixed = parseFloat(data.portfolio_share_fee_fixed);
                     data.share_fee_percent = parseFloat(data.portfolio_share_fee_percent);
                     data.gain_price = parseFloat(data.gain_price);
@@ -195,26 +232,26 @@
 
                         // Set Virtual capital
                         $(this).find('[data-virtual_capital]').data('virtual_capital', shareInfo.virtual_capital);
-                        $(this).find('[data-virtual_capital]').html(Math.round((shareInfo.virtual_capital * 100) / 100));
+                        $(this).find('[data-virtual_capital]').html(Math.round((shareInfo.virtual_capital * 100)) / 100);
                         
                         // Set Virtual capital gain
                         $(this).find('[data-virtual_capital_gain]').data('virtual_capital_gain', shareInfo.virtual_capital_gain);
-                        $(this).find('[data-virtual_capital_gain]').html(Math.round((shareInfo.virtual_capital_gain * 100) / 100));
+                        $(this).find('[data-virtual_capital_gain]').html(Math.round((shareInfo.virtual_capital_gain * 100)) / 100);
                         $(this).find('[data-virtual_capital_gain]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
                         
                         // Set Virtual capital gain percent
                         $(this).find('[data-virtual_gain_percent]').data('virtual_gain_percent', shareInfo.virtual_gain_percent);
-                        $(this).find('[data-virtual_gain_percent]').html(Math.round((shareInfo.virtual_gain_percent * 100) / 100));
+                        $(this).find('[data-virtual_gain_percent]').html(Math.round((shareInfo.virtual_gain_percent * 100)) / 100);
                         $(this).find('[data-virtual_gain_percent]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
 
                         // Set overall gain
                         $(this).find('[data-overall_gain]').data('overall_gain', shareInfo.overall_gain);
-                        $(this).find('[data-overall_gain]').html(Math.round((shareInfo.overall_gain * 100) / 100));
+                        $(this).find('[data-overall_gain]').html(Math.round((shareInfo.overall_gain * 100)) / 100);
                         $(this).find('[data-overall_gain]').parent().attr('data-loose_gain',overall_capital_lg);
                         
                         // Set overall percent
                         $(this).find('[data-overall_percent]').data('overall_percent', shareInfo.overall_percent);
-                        $(this).find('[data-overall_percent]').html(Math.round((shareInfo.overall_percent * 100) / 100));
+                        $(this).find('[data-overall_percent]').html(Math.round((shareInfo.overall_percent * 100)) / 100);
                         $(this).find('[data-overall_percent]').parent().attr('data-loose_gain',overall_capital_lg);
                     });
                 }
@@ -278,25 +315,29 @@
                                 overall_capital_lg = "gain";
                             }
                             // Set Virtual capital
-                            $(this).find('tfoot span[data-virtual_capital]').html(Math.round((virtual_capital * 100) / 100));
+                            $(this).find('tfoot span[data-virtual_capital]').html(Math.round((virtual_capital * 100)) / 100);
 
                             // Set Virtual capital gain
-                            $(this).find('tfoot [data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100) / 100));
+                            $(this).find('tfoot [data-virtual_capital_gain]').html(Math.round((virtual_capital_gain * 100)) / 100);
                             $(this).find('tfoot [data-virtual_capital_gain]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
 
                             // Set Virtual capital gain percent
-                            $(this).find('tfoot [data-virtual_gain_percent]').html(Math.round((virtual_gain_percent * 100) / 100));
+                            $(this).find('tfoot [data-virtual_gain_percent]').html(Math.round((virtual_gain_percent * 100)) / 100);
                             $(this).find('tfoot [data-virtual_gain_percent]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
 
                             // Set overall gain
-                            $(this).find('tfoot [data-overall_gain]').html(Math.round((overall_gain * 100) / 100));
+                            $(this).find('tfoot [data-overall_gain]').html(Math.round((overall_gain * 100)) / 100);
                             $(this).find('tfoot [data-overall_gain]').parent().attr('data-loose_gain',overall_capital_lg);
 
                             // Set overall percent
-                            $(this).find('tfoot [data-overall_percent]').html(Math.round((overall_percent * 100) / 100));
+                            $(this).find('tfoot [data-overall_percent]').html(Math.round((overall_percent * 100)) / 100);
                             $(this).find('tfoot [data-overall_percent]').parent().attr('data-loose_gain',overall_capital_lg);
                         });
                     });
+                }
+                
+                function updatePortfolio() {
+                    
                 }
                 
 
@@ -304,7 +345,7 @@
                 reloadShare();
                 window.setInterval(function(){
                     reloadShare();
-                }, 300000);
+                }, 3000000);
 
 
                     //http://jsbin.com/OQIZilU/5/edit?html,css,js,output
@@ -420,7 +461,7 @@
                         $datasTable = $portfoliosTotal;
                         $datasTotal = $templateVar['user']->total;
                         $currency = '€';
-                        //include __DIR__.'/share.inc.html';
+                        include __DIR__.'/share.inc.html';
                     ?>
                 </div>
                 
@@ -527,6 +568,7 @@
                 https://www.coinigy.com/bitcoin-api/
                 https://www.coinapi.io/
                 https://www.cryptocompare.com/api/#-api-data-coinlist-
+            @TODO : Manage currency for crypto money
             @TODO : Shares -> Add current exchange
             @TODO : Add new portfolio
             @TODO : Share line -> Set all data on tr
@@ -542,6 +584,11 @@
             @TODO : Performances -> Portfolio -> Set graph with benchmark
             @TODO : Order and align table
             @TODO : Split js
+            @TODO : Share -> Order portfolio by name
+            @TODO : Portfolio -> Order share by name
+            @TODO : Transaction manage hour
+            @TODO : Link to share detail
+            @TODO : Format holding to show only days / month or year
         </pre>
 
         @Information Ocfx / Coin checkup

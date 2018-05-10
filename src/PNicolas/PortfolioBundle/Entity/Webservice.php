@@ -9,17 +9,20 @@ class Webservice {
 	public $name = null;
 	protected $url_raw = null;
 	public $url = null;
+	public $codeName = null;
 	
 	/**
 	 * Set object
 	 * @param int $id
 	 * @param string $name
 	 * @param string $url
+	 * @param string $codeName
 	 */
-	public function set($id, $name, $url) {
+	public function set($id, $name, $url, $codeName) {
 		$this->id = $id;
 		$this->name = $name;
 		$this->url_raw = $url;
+		$this->codeName = $codeName;
 	}
 	
 	/**

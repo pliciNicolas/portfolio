@@ -35,7 +35,7 @@ class DashboardController {
 		}
 		foreach($data['webservice'] as $webservice_item) {
 			$webservice = new Webservice();
-			$webservice->set($webservice_item['id'], $webservice_item['name'], $webservice_item['url']);
+			$webservice->set($webservice_item['id'], $webservice_item['name'], $webservice_item['url'], $webservice_item['codeName']);
 			$webservices[$webservice_item['id']] = $webservice;
 		}
 		
