@@ -57,11 +57,111 @@
                     }
                     return outputArray;
             }
+            
+            
 
 
             $(document).ready(function () {
 
                 var debug = true;
+                
+                var api_key = [];
+                <?php
+//                foreach ($user_webservices as $webservice) {
+//                    echo "\napi_key[".$webservice->webservice->codeName."] = ".$webservice->webservice->api_key.";";
+//                }
+                ?>
+                        
+                if (debug) {
+                    console.info('Api Key');
+                    console.log(api_key);
+                }
+                
+                
+                
+                ///////////////////////////////
+                // Collect all active shares //
+                ///////////////////////////////
+                var active_shares = [];
+                
+                var today = new Date();
+                var week_market_open = (0 < today.getDay())&& (today.getDay() < 6);
+                $("#tab-share-resume tbody tr[data-share_active='active']").each(function() {
+                    var data = $(this).data();
+                    if (
+                            (!active_shares.hasOwnProperty(data.id_share))
+                            && (
+                                (null == data.current_price)
+                                || ("24" == share.open_market)
+                                || (week_market_open)
+                            )
+                    )
+                    {
+                        active_shares[data.id_share] = data;
+                    }
+                });
+                
+                if (debug) {
+                    console.info('Active shares');
+                    console.log(active_shares);
+                }
+                
+                
+                ///////////////////////////////////////
+                // Order active shares by webservice //
+                ///////////////////////////////////////
+                var active_shares_by_webservice = [];
+                
+                for (var symbol in active_shares) {
+                    var data = active_shares[symbol];
+                    if (!active_shares_by_webservice.hasOwnProperty(data.share_webservice)) {
+                        active_shares_by_webservice[data.share_webservice] = [];
+                    }
+                    active_shares_by_webservice[data.share_webservice][data.id_share] = data;
+                }
+
+                if (debug) {
+                    console.info('Active shares by webservice');
+                    console.log(active_shares_by_webservice);
+                }
+                
+
+                function reloadPrice(shares_by_webservice) {
+                    var reloadShare = [];
+                    for (var webserviceCode in shares_by_webservice) {
+                        var reloadPrice = [];
+                        switch (webserviceCode) {
+                            case 'cryptoCompare' : reloadPrice = reloadPriceCryptoCompare(shares_by_webservice[webserviceCode]); break;
+                            case 'quandl' : reloadPrice = reloadPriceQuandl(shares_by_webservice[webserviceCode]); break;
+                            case 'alphaAvantage' : reloadPrice = reloadPriceAlphaAvantage(shares_by_webservice[webserviceCode]); break;
+                        }
+                        reloadShare = reloadShare.concat(reloadPrice);
+                    }
+                    if (debug) {
+                        console.info('Reloaded share');
+                        console.log(reloadShare);
+                    }
+                }
+                
+                function reloadPriceCryptoCompare(shares) {
+                    for (var id_share in shares) {
+                        var data = shares;
+                    }
+                }
+                function reloadPriceQuandl(shares) {
+                    for (var id_share in shares) {
+                        var data = shares[id_share];
+                        var raw_url = "https://www.quandl.com/api/v3/datasets/@symbol@/data.json?api_key=@apiKey@";
+                        var symbol_url = raw_url.replace('@symbol@', data.share_symbol);
+                        
+                        console.log(url);
+                        
+                    }
+                }
+//                reloadPrice(active_shares_by_webservice);
+//                return false;
+                
+                
                 
                 // Get list of unique share to reload
                 var share_symbol = [];
@@ -80,7 +180,7 @@
                     console.log(share_symbol);
                 }
                 
-                var today = new Date();
+                
                 global_active = false;
                 function setActive(active) {
                     global_active = active;
@@ -102,7 +202,6 @@
                             if (debug) {
                                 console.log('Retrieve Share "'+share.symbol+'". LastPrice : '+share.last_price+', share.open_market : '+share.open_market+', GetDay : '+today.getDay());
                             }
-
                             var url = share.url;
                             var jqxhr = $.ajax(url)
                                     .done(function (msg) {
