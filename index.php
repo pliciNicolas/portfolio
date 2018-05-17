@@ -9,7 +9,6 @@ include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/User.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/User_Portfolio.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/User_Share.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/User_Share_Line.php';
-include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/User_Webservice.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/Webservice.php';
 
 

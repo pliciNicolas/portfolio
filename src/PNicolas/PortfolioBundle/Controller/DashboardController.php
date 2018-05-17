@@ -39,13 +39,12 @@ class DashboardController {
 			$webservices[$webservice_item['id']] = $webservice;
 		}
 		
-		$user_webservices = [];
 		if (!(array_key_exists('user_webservice', $data) && is_array($data['user_webservice']) && 0<count($data['user_webservice']))) {
 			throw new Exception('Cant find user_webservice in data file');
 		}
 		
 		foreach($data['user_webservice'] as $user_webservicee_item) {
-			$webservices[$user_webservicee_item['id_webservice']]->setUrlParameters($user_webservicee_item['api_key'], $user_webservicee_item['token']);
+			$webservices[$user_webservicee_item['id_webservice']]->setApiKey($user_webservicee_item['api_key']);
 		}
 		
 		$markets = [];

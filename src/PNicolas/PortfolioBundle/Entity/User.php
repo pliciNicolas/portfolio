@@ -11,6 +11,8 @@ class User {
 	public $portfolios = [];
 	public $total = null;
 	public $historic = [];
+	
+	public $apiKey = [];
         
 	public function __construct() {
 		$this->total = new User_Share_Line();
@@ -69,5 +71,13 @@ class User {
 		$this->total->addTransaction($transaction);
 
 		$this->historic[] = $transaction;
+	}
+	
+	/**
+	 * Return all code api code in json format
+	 * @return string
+	 */
+	public function getWebserviceApiKey() {
+		return json_encode($this->apiKey);
 	}
 }

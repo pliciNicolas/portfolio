@@ -23,7 +23,6 @@
         <!-- https://github.com/akquinet/jquery-toastmessage-plugin -->
         <script src="asset/js/jquery-toastmessage-plugin/src/main/javascript/jquery.toastmessage.js"></script>
         <link href="asset/js/jquery-toastmessage-plugin/src/main/resources/css/jquery.toastmessage.css" rel="stylesheet">
-        
 
         <script>
             $(function () {
@@ -65,19 +64,16 @@
 
                 var debug = true;
                 
-                var api_key = [];
-                <?php
-//                foreach ($user_webservices as $webservice) {
-//                    echo "\napi_key[".$webservice->webservice->codeName."] = ".$webservice->webservice->api_key.";";
-//                }
-                ?>
-                        
+                //////////////////////
+                // Collect api keys //
+                //////////////////////
+                var api_key_json = '<?php echo $templateVar['user']->getWebserviceApiKey()?>';
+                var api_key = JSON.parse(api_key_json);
                 if (debug) {
                     console.info('Api Key');
                     console.log(api_key);
                 }
-                
-                
+  
                 
                 ///////////////////////////////
                 // Collect all active shares //
@@ -153,7 +149,6 @@
                         var data = shares[id_share];
                         var raw_url = "https://www.quandl.com/api/v3/datasets/@symbol@/data.json?api_key=@apiKey@";
                         var symbol_url = raw_url.replace('@symbol@', data.share_symbol);
-                        
                         console.log(url);
                         
                     }

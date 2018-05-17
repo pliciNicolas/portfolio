@@ -11,6 +11,8 @@ class Webservice {
 	public $url = null;
 	public $codeName = null;
 	
+	public $apiKey = null;
+	
 	/**
 	 * Set object
 	 * @param int $id
@@ -26,12 +28,12 @@ class Webservice {
 	}
 	
 	/**
-	 * Set parameters
-	 * @param string $api_key
-	 * @param string $token
+	 * Set api Key for user
+	 * @param string $apiKey
 	 */
-	public function setUrlParameters($api_key, $token) {
-		$this->url = str_replace(['@api_key@', '@token@'], func_get_args(), $this->url_raw);
+	public function setApiKey($apiKey) {
+		$this->apiKey = $apiKey;
+		$this->url = str_replace('@api_key@', $this->apiKey, $this->url_raw);
 	}
 	
 	/**
