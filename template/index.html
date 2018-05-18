@@ -78,14 +78,15 @@
                 ///////////////////////////////
                 // Collect all active shares //
                 ///////////////////////////////
-                var active_shares = [];
+                var active_shares = new Array;
                 
                 var today = new Date();
+                var tmpIndex = [];
                 var week_market_open = (0 < today.getDay())&& (today.getDay() < 6);
                 $("#tab-share-resume tbody tr[data-share_active='active']").each(function() {
                     var data = $(this).data();
                     if (
-                            (!active_shares.hasOwnProperty(data.id_share))
+                            (-1 ==  tmpIndex.indexOf(data.id_share))
                             && (
                                 (null == data.current_price)
                                 || ("24" == share.open_market)
@@ -93,7 +94,8 @@
                             )
                     )
                     {
-                        active_shares[data.id_share] = data;
+                        active_shares.push(data);
+                        tmpIndex.push(data.id_share);
                     }
                 });
                 
@@ -149,12 +151,12 @@
                         var data = shares[id_share];
                         var raw_url = "https://www.quandl.com/api/v3/datasets/@symbol@/data.json?api_key=@apiKey@";
                         var symbol_url = raw_url.replace('@symbol@', data.share_symbol);
-                        console.log(url);
+                        //console.log(url);
                         
                     }
                 }
-//                reloadPrice(active_shares_by_webservice);
-//                return false;
+                reloadPrice(active_shares_by_webservice);
+                return false;
                 
                 
                 

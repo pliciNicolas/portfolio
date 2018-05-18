@@ -45,6 +45,7 @@ class DashboardController {
 		
 		foreach($data['user_webservice'] as $user_webservicee_item) {
 			$webservices[$user_webservicee_item['id_webservice']]->setApiKey($user_webservicee_item['api_key']);
+			$this->user->apiKey[$user_webservicee_item['id_webservice']] = $user_webservicee_item['api_key'];
 		}
 		
 		$markets = [];
