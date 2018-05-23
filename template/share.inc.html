@@ -40,7 +40,7 @@
             data-share_active="<?php echo ('share'==$type && $user_share_line->quantity?'active':'unactive'); ?>"
             data-share_symbol="<?php echo ('share'==$type?$user_share_line->share->symbol:''); ?>"
             data-share_openmarket="<?php echo ('share'==$type?$user_share_line->share->market->openHours:''); ?>"
-            data-share_webservice="<?php echo ('share'==$type?$user_share_line->share->market->webservice->codeName:''); ?>"
+            data-share_webservice="<?php echo ('share'==$type?$user_share_line->share->market->webservice->id:''); ?>"
 
             
             data-id_portfolio="<?php echo (is_null($user_share_line->portfolio)?'':$user_share_line->portfolio->id); ?>"

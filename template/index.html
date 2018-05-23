@@ -57,7 +57,20 @@
                     return outputArray;
             }
             
-            
+            /////////////////////
+            // External method //
+            /////////////////////
+            /**
+             * @author https://www.sitepoint.com/delay-sleep-pause-wait/
+             */
+            function sleep(milliseconds) {
+              var start = new Date().getTime();
+              for (var i = 0; i < 1e7; i++) {
+                if ((new Date().getTime() - start) > milliseconds){
+                  break;
+                }
+              }
+            }
 
 
             $(document).ready(function () {
@@ -115,7 +128,7 @@
                     if (!active_shares_by_webservice.hasOwnProperty(data.share_webservice)) {
                         active_shares_by_webservice[data.share_webservice] = [];
                     }
-                    active_shares_by_webservice[data.share_webservice][data.id_share] = data;
+                    active_shares_by_webservice[data.share_webservice].push(data);
                 }
 
                 if (debug) {
@@ -129,30 +142,103 @@
                     for (var webserviceCode in shares_by_webservice) {
                         var reloadPrice = [];
                         switch (webserviceCode) {
-                            case 'cryptoCompare' : reloadPrice = reloadPriceCryptoCompare(shares_by_webservice[webserviceCode]); break;
-                            case 'quandl' : reloadPrice = reloadPriceQuandl(shares_by_webservice[webserviceCode]); break;
-                            case 'alphaAvantage' : reloadPrice = reloadPriceAlphaAvantage(shares_by_webservice[webserviceCode]); break;
+                            case '1' : reloadPrice = reloadPriceQuandl(shares_by_webservice[webserviceCode]); break;
+                            //case '2' : reloadPrice = reloadPriceCryptoCompare(shares_by_webservice[webserviceCode]); break;
+                            //case '3' : reloadPrice = reloadPriceAlphaAvantage(shares_by_webservice[webserviceCode]); break;
                         }
                         reloadShare = reloadShare.concat(reloadPrice);
                     }
                     if (debug) {
                         console.info('Reloaded share');
-                        console.log(reloadShare);
+//                        console.log(reloadShare);
                     }
                 }
                 
                 function reloadPriceCryptoCompare(shares) {
+                    if (debug) {
+                        console.info('reloadPriceCryptoCompare');
+                    }
                     for (var id_share in shares) {
                         var data = shares;
                     }
                 }
+                
+                
+// Create the XHR object.
+function createCORSRequest(method, url) {
+  var xhr = new XMLHttpRequest();
+  if ("withCredentials" in xhr) {
+    // XHR for Chrome/Firefox/Opera/Safari.
+    xhr.open(method, url, true);
+  } else if (typeof XDomainRequest != "undefined") {
+    // XDomainRequest for IE.
+    xhr = new XDomainRequest();
+    xhr.open(method, url);
+  } else {
+    // CORS not supported.
+    xhr = null;
+  }
+  return xhr;
+}
+
+// Helper method to parse the title tag from the response.
+function getTitle(text) {
+  return text.match('<title>(.*)?</title>')[1];
+}
+
+// Make the actual CORS request.
+function makeCorsRequest(url) {
+  // This is a sample server that supports CORS.
+  //var url = 'http://html5rocks-cors.s3-website-us-east-1.amazonaws.com/index.html';
+
+  var xhr = createCORSRequest('GET', url);
+  if (!xhr) {
+    alert('CORS not supported');
+    return;
+  }
+
+  // Response handlers.
+  xhr.onload = function() {
+    var text = xhr.responseText;
+console.log(text);
+    var title = getTitle(text);
+    alert('Response from CORS request to ' + url + ': ' + title);
+  };
+
+  xhr.onerror = function() {
+    alert('Woops, there was an error making the request.');
+  };
+
+  xhr.send();
+}
+                
                 function reloadPriceQuandl(shares) {
+                    if (debug) {
+                        console.info('reloadPriceQuandl');
+                    }
+                    var raw_url = "https://www.quandl.com/api/v3/datasets/@symbol@/data.json?api_key=@apiKey@";
+                    var api_url = raw_url.replace('@apiKey@', api_key[1]);
                     for (var id_share in shares) {
                         var data = shares[id_share];
-                        var raw_url = "https://www.quandl.com/api/v3/datasets/@symbol@/data.json?api_key=@apiKey@";
-                        var symbol_url = raw_url.replace('@symbol@', data.share_symbol);
-                        //console.log(url);
-                        
+                        var url = api_url.replace('@symbol@', data.share_symbol);
+console.log(url);
+makeCorsRequest(url);
+                        var current_price = null;
+//                        var jqxhr = $.ajax(url)
+//                            .done(function (result) {
+//                                current_price = result.dataset.data[0][4];
+//                                if (debug) {
+//                                    console.info('Quandl Api Price for "'+data.share_symbol+'" : '+current_price);
+//                                }
+//                                sleep(1000);
+//                            })
+//                            .fail(function (msg) {
+//                                $().toastmessage('showErrorToast', "Error when rertieving "+data.share_symbol);
+//                                console.log(msg);
+//                            })
+//                            .always(function (msg) {
+//                                //console.log(msg);
+//                            });
                     }
                 }
                 reloadPrice(active_shares_by_webservice);
