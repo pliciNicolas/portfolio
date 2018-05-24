@@ -164,54 +164,6 @@
                 }
                 
                 
-// Create the XHR object.
-function createCORSRequest(method, url) {
-  var xhr = new XMLHttpRequest();
-  if ("withCredentials" in xhr) {
-    // XHR for Chrome/Firefox/Opera/Safari.
-    xhr.open(method, url, true);
-  } else if (typeof XDomainRequest != "undefined") {
-    // XDomainRequest for IE.
-    xhr = new XDomainRequest();
-    xhr.open(method, url);
-  } else {
-    // CORS not supported.
-    xhr = null;
-  }
-  return xhr;
-}
-
-// Helper method to parse the title tag from the response.
-function getTitle(text) {
-  return text.match('<title>(.*)?</title>')[1];
-}
-
-// Make the actual CORS request.
-function makeCorsRequest(url) {
-  // This is a sample server that supports CORS.
-  //var url = 'http://html5rocks-cors.s3-website-us-east-1.amazonaws.com/index.html';
-
-  var xhr = createCORSRequest('GET', url);
-  if (!xhr) {
-    alert('CORS not supported');
-    return;
-  }
-
-  // Response handlers.
-  xhr.onload = function() {
-    var text = xhr.responseText;
-console.log(text);
-    var title = getTitle(text);
-    alert('Response from CORS request to ' + url + ': ' + title);
-  };
-
-  xhr.onerror = function() {
-    alert('Woops, there was an error making the request.');
-  };
-
-  xhr.send();
-}
-                
                 function reloadPriceQuandl(shares) {
                     if (debug) {
                         console.info('reloadPriceQuandl');
@@ -221,26 +173,59 @@ console.log(text);
                     for (var id_share in shares) {
                         var data = shares[id_share];
                         var url = api_url.replace('@symbol@', data.share_symbol);
-console.log(url);
-makeCorsRequest(url);
+                        var avoid_cors_url = '<?php echo $_SERVER["REQUEST_URI"]; ?>src/PNicolas/PortfolioBundle/Controller/AvoidCorsController.php?url='+url;
                         var current_price = null;
-//                        var jqxhr = $.ajax(url)
-//                            .done(function (result) {
-//                                current_price = result.dataset.data[0][4];
-//                                if (debug) {
-//                                    console.info('Quandl Api Price for "'+data.share_symbol+'" : '+current_price);
-//                                }
-//                                sleep(1000);
-//                            })
-//                            .fail(function (msg) {
-//                                $().toastmessage('showErrorToast', "Error when rertieving "+data.share_symbol);
-//                                console.log(msg);
-//                            })
-//                            .always(function (msg) {
-//                                //console.log(msg);
-//                            });
+                        var jqxhr = $.ajax(avoid_cors_url)
+                            .done(function (result) {
+                                if (result.error.error) {
+                                    $().toastmessage('showErrorToast', "Error when retrieving "+data.share_symbol+' : '+result.error.message);
+                                    console.log(result);
+                                } else {
+                                
+                                    if (result.hasOwnProperty('quandl_error')) {
+                                        $().toastmessage('showErrorToast', "Error when retrieving "+data.share_symbol+' : Err ('+result.quandl_error.code+') '+result.quandl_error.message);
+                                        console.log(result);
+                                    } else {
+                                    
+                                        var indCurrentPrice = null;
+                                        var indOpenPrice = null;
+                                        for (i in result.data.dataset_data.column_names) {
+                                            if ('Open' == result.data.dataset_data.column_names[i]) {
+                                                indOpenPrice = i;
+                                            }
+                                            if ('Last' == result.data.dataset_data.column_names[i]) {
+                                                indCurrentPrice = i;
+                                            }
+                                        }
+
+                                        var sharePrices = {share: data.id_share, current_price : null, open_price : null};
+
+                                        if (indCurrentPrice != null ){
+                                            sharePrices.current_price = result.data.dataset_data.data[0][indCurrentPrice];
+                                        }
+                                        if (indOpenPrice != null ){
+                                            sharePrices.open_price = result.data.dataset_data.data[0][indOpenPrice];
+                                        }
+
+                                        if (debug) {
+                                            console.info('Quandl Api Price for "'+data.share_symbol+'" : '+sharePrices.current_price);
+                                            console.log(sharePrices);
+                                        }
+                                    }
+                                }
+                                sleep(1000);
+                            })
+                            .fail(function (msg) {
+                                $().toastmessage('showErrorToast', "Error when rertieving "+data.share_symbol);
+                                console.log(msg);
+                            })
+                            .always(function (msg) {
+                                //console.log(msg);
+                            });
                     }
                 }
+                
+                
                 reloadPrice(active_shares_by_webservice);
                 return false;
                 
