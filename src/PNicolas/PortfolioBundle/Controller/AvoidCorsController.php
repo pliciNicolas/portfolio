@@ -10,7 +10,7 @@ class AvoidCorsController {
 	public function __construct() {
 		$curl = new Curl();
 		
-		$url = $_REQUEST['url'];
+		$url = urldecode($_REQUEST['url']);
 		$method = 'GET';
 		$data_get = null;
 		$data_post = null;

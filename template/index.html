@@ -118,40 +118,21 @@
                 }
                 
                 
-                ///////////////////////////////////////
-                // Order active shares by webservice //
-                ///////////////////////////////////////
-                var active_shares_by_webservice = [];
-                
-                for (var symbol in active_shares) {
-                    var data = active_shares[symbol];
-                    if (!active_shares_by_webservice.hasOwnProperty(data.share_webservice)) {
-                        active_shares_by_webservice[data.share_webservice] = [];
-                    }
-                    active_shares_by_webservice[data.share_webservice].push(data);
-                }
-
-                if (debug) {
-                    console.info('Active shares by webservice');
-                    console.log(active_shares_by_webservice);
-                }
-                
-
-                function reloadPrice(shares_by_webservice) {
-                    var reloadShare = [];
-                    for (var webserviceCode in shares_by_webservice) {
-                        var reloadPrice = [];
-                        switch (webserviceCode) {
-                            case '1' : reloadPrice = reloadPriceQuandl(shares_by_webservice[webserviceCode]); break;
-                            //case '2' : reloadPrice = reloadPriceCryptoCompare(shares_by_webservice[webserviceCode]); break;
-                            //case '3' : reloadPrice = reloadPriceAlphaAvantage(shares_by_webservice[webserviceCode]); break;
+                //////////////////////////////////////////
+                // Reload all prices for actives shares //
+                //////////////////////////////////////////
+                function reloadPrices(shares) {
+                    for (var i in shares) {
+                        var apiReturn = null;
+                        switch (shares[i].share_webservice) {
+                            case 'quandl' : apiReturn = reloadPriceQuandl(shares[i]); break;
+                            //case 'cryptoCompare' : apiReturn = reloadPriceCryptoCompare(shares[i]); break;
+                            //case 'alphaAvantage' : apiReturn = reloadPriceAlphaAvantage(shares[i]); break;
                         }
-                        reloadShare = reloadShare.concat(reloadPrice);
+                        // reloadPrice(apiReturn);
+                        sleep(500);
                     }
-                    if (debug) {
-                        console.info('Reloaded share');
-//                        console.log(reloadShare);
-                    }
+
                 }
                 
                 function reloadPriceCryptoCompare(shares) {
@@ -163,72 +144,102 @@
                     }
                 }
                 
+                function getApiSharePriceFormat(id_share) {
+                    return {share: id_share, current_price : null, open_price : null};
+                }
                 
-                function reloadPriceQuandl(shares) {
+                function reloadPriceQuandl(data) {
                     if (debug) {
                         console.info('reloadPriceQuandl');
                     }
-                    var raw_url = "https://www.quandl.com/api/v3/datasets/@symbol@/data.json?api_key=@apiKey@";
-                    var api_url = raw_url.replace('@apiKey@', api_key[1]);
-                    for (var id_share in shares) {
-                        var data = shares[id_share];
-                        var url = api_url.replace('@symbol@', data.share_symbol);
-                        var avoid_cors_url = '<?php echo $_SERVER["REQUEST_URI"]; ?>src/PNicolas/PortfolioBundle/Controller/AvoidCorsController.php?url='+url;
-                        var current_price = null;
-                        var jqxhr = $.ajax(avoid_cors_url)
-                            .done(function (result) {
-                                if (result.error.error) {
-                                    $().toastmessage('showErrorToast', "Error when retrieving "+data.share_symbol+' : '+result.error.message);
-                                    console.log(result);
-                                } else {
-                                
-                                    if (result.hasOwnProperty('quandl_error')) {
-                                        $().toastmessage('showErrorToast', "Error when retrieving "+data.share_symbol+' : Err ('+result.quandl_error.code+') '+result.quandl_error.message);
-                                        console.log(result);
-                                    } else {
-                                    
-                                        var indCurrentPrice = null;
-                                        var indOpenPrice = null;
-                                        for (i in result.data.dataset_data.column_names) {
-                                            if ('Open' == result.data.dataset_data.column_names[i]) {
-                                                indOpenPrice = i;
-                                            }
-                                            if ('Last' == result.data.dataset_data.column_names[i]) {
-                                                indCurrentPrice = i;
-                                            }
-                                        }
+                    
+                    return callUrl(data.share_url, data.share_symbol, parseQuandlResult);
+                }
+                
+                reloadPrices(active_shares);
+return false;
+                
+                /**
+                 * Parse quandl Api result
+                 * 
+                 * @param string symbol
+                 * @param array result
+                 * 
+                 * @returns object
+                 */
+                function parseQuandlResult(symbol, api_result) {
+console.log(symbol);
+console.log(api_result);
+console.log(typeof(api_result));
+return false;
+                    if (api_result.hasOwnProperty('quandl_error')) {
+                        $().toastmessage('showErrorToast', "Error when retrieving "+symbol+' : Err ('+api_result.quandl_error.code+') '+api_result.quandl_error.message);
+                        console.log(result);
+                        return null;
+                    } else {
+                        var indCurrentPrice = null;
+                        var indOpenPrice = null;
+                        for (i in api_result.dataset_data.column_names) {
+                            if ('Open' == api_result.dataset_data.column_names[i]) {
+                                indOpenPrice = i;
+                            }
+                            if ('Last' == api_result.dataset_data.column_names[i]) {
+                                indCurrentPrice = i;
+                            }
+                        }
 
-                                        var sharePrices = {share: data.id_share, current_price : null, open_price : null};
+                        var sharePrices = getApiSharePriceFormat(symbol);
 
-                                        if (indCurrentPrice != null ){
-                                            sharePrices.current_price = result.data.dataset_data.data[0][indCurrentPrice];
-                                        }
-                                        if (indOpenPrice != null ){
-                                            sharePrices.open_price = result.data.dataset_data.data[0][indOpenPrice];
-                                        }
+                        if (indCurrentPrice != null ){
+                            sharePrices.current_price = api_result.dataset_data.data[0][indCurrentPrice];
+                        }
+                        if (indOpenPrice != null ){
+                            sharePrices.open_price = api_result.dataset_data.data[0][indOpenPrice];
+                        }
 
-                                        if (debug) {
-                                            console.info('Quandl Api Price for "'+data.share_symbol+'" : '+sharePrices.current_price);
-                                            console.log(sharePrices);
-                                        }
-                                    }
-                                }
-                                sleep(1000);
-                            })
-                            .fail(function (msg) {
-                                $().toastmessage('showErrorToast', "Error when rertieving "+data.share_symbol);
-                                console.log(msg);
-                            })
-                            .always(function (msg) {
-                                //console.log(msg);
-                            });
+                        if (debug) {
+                            console.info('Quandl Api Price for "'+symbol+'" : '+sharePrices.current_price);
+                            console.log(sharePrices);
+                        }
+                        return sharePrices;
                     }
                 }
                 
+                /**
+                 * Call url to avoid cors
+                 * 
+                 * @param string url
+                 * @param string symbol
+                 * @param method parseResultMethod
+                 * 
+                 * @returns null / object
+                 */
+                function callUrl(url, symbol, parseResultMethod) {
+                    var avoid_cors_url = '<?php echo $_SERVER["REQUEST_URI"]; ?>src/PNicolas/PortfolioBundle/Controller/AvoidCorsController.php?url='+encodeURI(url);
+                    var jqxhr = $.ajax(avoid_cors_url)
+                        .done(function (result) {
+                            if (result.error.error) {
+                                $().toastmessage('showErrorToast', "Error when retrieving "+symbol+' : '+result.error.message);
+                                console.info('Error Api Price for "'+url);
+                                console.log(result);
+                                return null;
+                            } else {
+                                return parseResultMethod.call(symbol, result.data);
+                            }
+                        })
+                        .fail(function (msg) {
+                            $().toastmessage('showErrorToast', "Error when rertieving "+symbol);
+                            console.info('Error Api Price for "'+url);
+                            console.log(msg);
+                            return null;
+                        })
+                        .always(function (msg) {
+                            //console.log(msg);
+                        })
+                    ;
+                }
                 
-                reloadPrice(active_shares_by_webservice);
-                return false;
-                
+
                 
                 
                 // Get list of unique share to reload
