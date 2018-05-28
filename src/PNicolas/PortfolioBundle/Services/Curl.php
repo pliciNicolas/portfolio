@@ -103,7 +103,7 @@ class Curl {
             $return['data'] = $body;
         }
 		
-		return json_encode($return);
+		return $return;
 	}
 	
     /**

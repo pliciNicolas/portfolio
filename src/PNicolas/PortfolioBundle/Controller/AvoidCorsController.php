@@ -27,8 +27,12 @@ class AvoidCorsController {
             CURLOPT_CONNECTTIMEOUT => 0,
 		);
 		
+		
 		header('Content-Type: application/json;charset=utf-8');
-		echo trim($curl->performRequest($url, $method, $data_get, $data_post, $header_to_send, $curl_options));
+		$result = $curl->performRequest($url, $method, $data_get, $data_post, $header_to_send, $curl_options);
+		
+		http_response_code($result['http_header']['response_code']);
+		echo trim(json_encode($result));
 		
 		die();
 	}
