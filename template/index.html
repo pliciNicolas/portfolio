@@ -77,16 +77,6 @@
 
                 var debug = true;
                 
-                //////////////////////
-                // Collect api keys //
-                //////////////////////
-                var api_key_json = '<?php echo $templateVar['user']->getWebserviceApiKey()?>';
-                var api_key = JSON.parse(api_key_json);
-                if (debug) {
-                    console.info('Api Key');
-                    console.log(api_key);
-                }
-  
                 
                 ///////////////////////////////
                 // Collect all active shares //
@@ -118,6 +108,33 @@
                 }
                 
                 
+                //////////////////////////////////////
+                // Collect all portfolios to reload //
+                //////////////////////////////////////
+                var portfolio_to_reload = new Array();
+                
+                for (var i in tmpIndex) {
+                    var id_share = tmpIndex[i];
+                    $("tbody tr[data-id_share='"+id_share+"']").each(function() {
+                        var data = $(this).data();
+                        if (
+                                (-1 ==  portfolio_to_reload.indexOf(data.id_portfolio))
+                                && (0 < parseInt(data.id_portfolio,10))
+                                
+                        )
+                        {
+                            portfolio_to_reload.push(data.id_portfolio);
+                        }
+                    });
+                    
+                }
+                
+                
+                if (debug) {
+                    console.info('Portfolio to reload');
+                    console.log(portfolio_to_reload);
+                }
+                
                 //////////////////////////////////////////
                 // Reload all prices for actives shares //
                 //////////////////////////////////////////
@@ -125,88 +142,107 @@
                     for (var i in shares) {
                         var apiReturn = null;
                         switch (shares[i].share_webservice) {
-                            case 'quandl' : reloadPriceQuandl(shares[i]); break;
-                            case 'cryptoCompare' : reloadPriceCryptoCompare(shares[i]); break;
-                            //case 'alphaAvantage' : reloadPriceAlphaAvantage(shares[i]); break;
+                            case 'quandl' : callUrl(shares[i], parseQuandlResult); break;
+                            case 'cryptoCompare' : callUrl(shares[i], parseCryptoCompareResult); break;
+                            case 'alphaAvantage' : callUrl(shares[i], parseAlphaAvantageResult); break;
                         }
-                        // reloadPrice(shares[i]);
+                        reloadPrice(shares[i]);
                         sleep(500);
                     }
 
                 }
                 
-                function reloadPriceCryptoCompare(data) {
+                /**
+                 * Call url to avoid cors
+                 * 
+                 * @param object share_line
+                 * @param method parseResultMethod
+                 * 
+                 * @returns null / object
+                 */
+                function callUrl(share_line, parseResultMethod) {
                     if (debug) {
-                        console.info('reloadPriceCryptoCompare');
+                        console.info(parseResultMethod.name+' '+share_line.share_symbol);
                     }
-                    return callUrl(data, parseCryptoCompareResult);
-                }
-                
-                
-                function reloadPriceQuandl(data) {
-                    if (debug) {
-                        console.info('reloadPriceQuandl');
-                    }
-                    
-                    return callUrl(data, parseQuandlResult);
-                }
+                    var avoid_cors_url = '<?php echo $_SERVER["REQUEST_URI"]; ?>src/PNicolas/PortfolioBundle/Controller/AvoidCorsController.php';
 
-                function reloadPriceAlphaAvantage(data) {
-                    if (debug) {
-                        console.info('reloadPriceAlphaAvantage');
-                    }
-                    
-                    return callUrl(data, parseAlphaAvantageResult);
+                    var jqxhr = $.get(
+                            avoid_cors_url
+                            , {
+                                url: share_line.share_url
+                            }
+                        )
+                        .done(function (result) {
+                            if (result.error.error) {
+                                $().toastmessage('showErrorToast', "Error when retrieving "+share_line.share_symbol+' : '+result.error.message);
+                                console.info('Error Api Price for "'+share_line.share_url);
+                                console.log(result);
+                                return share_line;
+                            } else {
+                                return parseResultMethod(share_line, result.data);
+                            }
+                        })
+                        .fail(function (msg) {
+                            $().toastmessage('showErrorToast', "Error when rertieving "+share_line.share_symbol);
+                            console.info('Error Api Price for "'+share_line.share_url);
+                            console.log(msg);
+                            return null;
+                        })
+                        .always(function (msg) {
+                            //console.log(msg);
+                        })
+                    ;
                 }
-                
-                reloadPrices(active_shares);
-
                 
                 /**
                  * Parse quandl Api result
                  * 
-                 * @param object symbol
-                 * @param array result
+                 * @param object share_line
+                 * @param object api_result
                  * 
                  * @returns object
                  */
                 function parseQuandlResult(share_line, api_result) {
                     if (api_result.hasOwnProperty('quandl_error')) {
                         $().toastmessage('showErrorToast', "Error when retrieving "+share_line.share_symbol+' : Err ('+api_result.quandl_error.code+') '+api_result.quandl_error.message);
-                        console.log(result);
-                        return share_line;
-                    } else {
-                        var indCurrentPrice = null;
-                        var indOpenPrice = null;
-                        for (i in api_result.dataset_data.column_names) {
-                            if ('Open' == api_result.dataset_data.column_names[i]) {
-                                indOpenPrice = i;
-                            }
-                            if ('Last' == api_result.dataset_data.column_names[i]) {
-                                indCurrentPrice = i;
-                            }
-                        }
-
-                        if (indCurrentPrice != null ){
-                            share_line.current_price = api_result.dataset_data.data[0][indCurrentPrice];
-                        }
-                        if (indOpenPrice != null ){
-                            share_line.open_price = api_result.dataset_data.data[0][indOpenPrice];
-                        }
-
-                        if (debug) {
-                            console.info('Quandl Api Price for "'+share_line.share_symbol+'" : '+share_line.current_price);
-                            //console.log(share_line);
-                        }
+                        console.log(api_result);
                         return share_line;
                     }
+                    if (0==api_result.dataset_data.data.length) {
+                        $().toastmessage('showErrorToast', "Error when retrieving "+share_line.share_symbol+' : No data');
+                        console.log(api_result);
+                        return share_line;
+                    }
+                    var indCurrentPrice = null;
+                    var indOpenPrice = null;
+                    for (i in api_result.dataset_data.column_names) {
+                        if ('Open' == api_result.dataset_data.column_names[i]) {
+                            indOpenPrice = i;
+                        }
+                        if ('Last' == api_result.dataset_data.column_names[i]) {
+                            indCurrentPrice = i;
+                        }
+                    }
+
+                    if (indCurrentPrice != null ){
+                        share_line.current_price = api_result.dataset_data.data[0][indCurrentPrice];
+                    }
+                    if (indOpenPrice != null ){
+                        share_line.open_price = api_result.dataset_data.data[0][indOpenPrice];
+                    }
+
+                    if (debug) {
+                        console.info('Quandl Api Price for "'+share_line.share_symbol+'" : '+share_line.current_price);
+                        //console.log(share_line);
+                    }
+                    return share_line;
                 }
                 
                 /**
                  * Parse CryptoCompare Api result
                  * 
-                 * @param object symbol
-                 * @param array result
+                 * @param object share_line
+                 * @param object api_result
                  * 
                  * @returns object
                  */
@@ -229,8 +265,8 @@
                 /**
                  * Parse AlphaAvantage Api result
                  * 
-                 * @param object symbol
-                 * @param array result
+                 * @param object share_line
+                 * @param object api_result
                  * 
                  * @returns object
                  */
@@ -259,46 +295,94 @@
                 }
                 
                 /**
-                 * Call url to avoid cors
+                 * Parse AlphaAvantage Api result
                  * 
                  * @param object share_line
-                 * @param method parseResultMethod
                  * 
-                 * @returns null / object
                  */
-                function callUrl(share_line, parseResultMethod) {
-                    var url = share_line.share_url;
-                    var symbol = share_line.share_symbol;
-                    var avoid_cors_url = '<?php echo $_SERVER["REQUEST_URI"]; ?>src/PNicolas/PortfolioBundle/Controller/AvoidCorsController.php';
+                function changeDataValues(share_line) {
+                    share_line.current_percent =  (share_line.current_price - share_line.open_price) / share_line.open_price;
+                    share_line.current_loose_gain =  'loose';
+                    if (0 < share_line.current_percent) {
+                        share_line.current_loose_gain = 'gain';
+                    }
 
-                    var jqxhr = $.get(
-                            avoid_cors_url
-                            , {
-                                url: url
-                            }
-                        )
-                        .done(function (result) {
-                            if (result.error.error) {
-                                $().toastmessage('showErrorToast', "Error when retrieving "+symbol+' : '+result.error.message);
-                                console.info('Error Api Price for "'+url);
-                                console.log(result);
-                                return share_line;
-                            } else {
-                                return parseResultMethod(share_line, result.data);
-                            }
-                        })
-                        .fail(function (msg) {
-                            $().toastmessage('showErrorToast', "Error when rertieving "+symbol);
-                            console.info('Error Api Price for "'+url);
-                            console.log(msg);
-                            return null;
-                        })
-                        .always(function (msg) {
-                            //console.log(msg);
-                        })
-                    ;
+                    // Calculate
+                    share_line.virtual_capital = (share_line.currentPrice * share_line.quantity * (1-share_line.share_fee_percent)) - share_line.share_fee_fixed;
+                    share_line.virtual_capital_gain = share_line.virtual_capital - share_line.capital;
+                    share_line.virtual_gain_percent = share_line.virtual_capital_gain / share_line.capital * 100;
+                    share_line.virtual_gain_loose_gain = 'loose';
+                    if(0 < share_line.virtual_gain_percent) {
+                        share_line.virtual_gain_loose_gain = 'gain';
+                    }
+                    share_line.overall_gain = share_line.virtual_capital_gain + share_line.gain_price;
+                    share_line.overall_percent = share_line.overall_gain / share_line.capital * 100;
+                    share_line.overall_loose_gain = 'loose';
+                    if(0 < share_line.overall_loose_gain) {
+                        share_line.overall_loose_gain = 'gain';
+                    }
+                }
+                        
+                
+                function reloadPrice(share_line) {
+                    changeDataValues(share_line);
+                    $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
+
+                        // Set current price
+                        $(this).find('[data-current_unit_price]').data('current_unit_price', apiData.currentPrice);
+                        $(this).find('[data-current_unit_price]').html(apiData.currentPrice);
+                        $(this).find('[data-current_percent]').data('current_percent', apiData.change);
+                        $(this).find('[data-current_percent]').html(Math.round(apiData.change * 100) / 100);
+                        var current_percent = "loose";
+                        if (0 < apiData.change) {
+                            current_percent = "gain";
+                        }
+                        $(this).find('[data-current_percent]').parent().attr('data-loose_gain',current_percent);
+                        
+                        var shareInfo = getShareLineInfo($(this), apiData);
+                        if (debug) {
+                            shareInfo.method = 'updateShareLine';
+                            console.log(shareInfo);
+                        }
+                        
+                        var virtual_capital_gain_lg = "loose";
+                        if (0 < shareInfo.virtual_capital_gain) {
+                            virtual_capital_gain_lg = "gain";
+                        }
+                        var overall_capital_lg = "loose";
+                        if (0 < shareInfo.overall_gain) {
+                            overall_capital_lg = "gain";
+                        }
+
+                        // Set Virtual capital
+                        $(this).find('[data-virtual_capital]').data('virtual_capital', shareInfo.virtual_capital);
+                        $(this).find('[data-virtual_capital]').html(Math.round((shareInfo.virtual_capital * 100)) / 100);
+                        
+                        // Set Virtual capital gain
+                        $(this).find('[data-virtual_capital_gain]').data('virtual_capital_gain', shareInfo.virtual_capital_gain);
+                        $(this).find('[data-virtual_capital_gain]').html(Math.round((shareInfo.virtual_capital_gain * 100)) / 100);
+                        $(this).find('[data-virtual_capital_gain]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
+                        
+                        // Set Virtual capital gain percent
+                        $(this).find('[data-virtual_gain_percent]').data('virtual_gain_percent', shareInfo.virtual_gain_percent);
+                        $(this).find('[data-virtual_gain_percent]').html(Math.round((shareInfo.virtual_gain_percent * 100)) / 100);
+                        $(this).find('[data-virtual_gain_percent]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
+
+                        // Set overall gain
+                        $(this).find('[data-overall_gain]').data('overall_gain', shareInfo.overall_gain);
+                        $(this).find('[data-overall_gain]').html(Math.round((shareInfo.overall_gain * 100)) / 100);
+                        $(this).find('[data-overall_gain]').parent().attr('data-loose_gain',overall_capital_lg);
+                        
+                        // Set overall percent
+                        $(this).find('[data-overall_percent]').data('overall_percent', shareInfo.overall_percent);
+                        $(this).find('[data-overall_percent]').html(Math.round((shareInfo.overall_percent * 100)) / 100);
+                        $(this).find('[data-overall_percent]').parent().attr('data-loose_gain',overall_capital_lg);
+                    });
+console.log(share_line);
                 }
                 
+                
+                 reloadPrices(active_shares);
 
                 
 return false; 
