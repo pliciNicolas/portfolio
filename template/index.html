@@ -208,27 +208,27 @@
                         console.log(api_result);
                         return share_line;
                     }
-                    if (0==api_result.dataset_data.data.length) {
+                    if (0==api_result.dataset.data.length) {
                         $().toastmessage('showErrorToast', "Error when retrieving "+share_line.share_symbol+' : No data');
                         console.log(api_result);
                         return share_line;
                     }
                     var indCurrentPrice = null;
                     var indOpenPrice = null;
-                    for (i in api_result.dataset_data.column_names) {
-                        if ('Open' == api_result.dataset_data.column_names[i]) {
+                    for (i in api_result.dataset.column_names) {
+                        if ('Open' == api_result.dataset.column_names[i]) {
                             indOpenPrice = i;
                         }
-                        if ('Last' == api_result.dataset_data.column_names[i]) {
+                        if ('Last' == api_result.dataset.column_names[i]) {
                             indCurrentPrice = i;
                         }
                     }
 
                     if (indCurrentPrice != null ){
-                        share_line.current_price = api_result.dataset_data.data[0][indCurrentPrice];
+                        share_line.current_price = api_result.dataset.data[0][indCurrentPrice];
                     }
                     if (indOpenPrice != null ){
-                        share_line.open_price = api_result.dataset_data.data[0][indOpenPrice];
+                        share_line.open_price = api_result.dataset.data[0][indOpenPrice];
                     }
 
                     if (debug) {
@@ -249,7 +249,7 @@
                 function parseCryptoCompareResult(share_line, api_result) {
                     if (api_result.hasOwnProperty('Response') && 'Error' == api_result.Response) {
                         $().toastmessage('showErrorToast', "Error when retrieving "+share_line.share_symbol+' : Err ('+api_result.Message+') ');
-                        console.log(result);
+                        console.log(api_result);
                         return share_line;
                     }
                     share_line.current_price = Math.round((api_result.RAW[share_line.id_share]['EUR']['PRICE'] * 100)) / 100;
@@ -273,7 +273,7 @@
                 function parseAlphaAvantageResult(share_line, api_result) {
                     if (api_result.hasOwnProperty('Response') && 'Error' == api_result.Response) {
                         $().toastmessage('showErrorToast', "Error when retrieving "+share_line.share_symbol+' : Err ('+api_result.Message+') ');
-                        console.log(result);
+                        console.log(api_result);
                         return share_line;
                     }
                     
@@ -326,6 +326,9 @@
                 
                 function reloadPrice(share_line) {
                     changeDataValues(share_line);
+
+console.log(share_line);
+return false;
                     $("tbody tr[data-share_symbol='"+symbol+"'][data-share_active='active']").each(function () {
 
                         // Set current price
