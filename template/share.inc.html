@@ -152,15 +152,15 @@
                 <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
             </td>
             <td class="current_price">
-                <span data-current_unit_price="" class="refresh"></span>
+                <span class="refresh"></span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
-            <td class="current_percent">
-                <span data-current_percent="" class="refresh"></span>
+            <td class="current_percent" data-loose_gain="neutral">
+                <span class="refresh"></span>
                 <?php echo ($user_share_line->quantity?'%':'-'); ?>
             </td>
             <td class="virtual_capital">
-                <span data-virtual_capital="" class="refresh"></span>
+                <span class="refresh"></span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
             <td class="virtual_capital_gain" data-loose_gain="neutral">
