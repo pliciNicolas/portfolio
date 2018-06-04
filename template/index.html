@@ -212,27 +212,27 @@
                         console.log(api_result);
                         return share_line;
                     }
-                    if (0==api_result.dataset.data.length) {
+                    if (0==api_result.dataset_data.data.length) {
                         $().toastmessage('showErrorToast', "Error when retrieving "+share_line.share_symbol+' : No data');
                         console.log(api_result);
                         return share_line;
                     }
                     var indCurrentPrice = null;
                     var indOpenPrice = null;
-                    for (i in api_result.dataset.column_names) {
-                        if ('Open' == api_result.dataset.column_names[i]) {
+                    for (i in api_result.dataset_data.column_names) {
+                        if ('Open' == api_result.dataset_data.column_names[i]) {
                             indOpenPrice = i;
                         }
-                        if ('Last' == api_result.dataset.column_names[i]) {
+                        if ('Last' == api_result.dataset_data.column_names[i]) {
                             indCurrentPrice = i;
                         }
                     }
 
                     if (indCurrentPrice != null ){
-                        share_line.current_price = api_result.dataset.data[0][indCurrentPrice];
+                        share_line.current_price = api_result.dataset_data.data[0][indCurrentPrice];
                     }
                     if (indOpenPrice != null ){
-                        share_line.open_price = api_result.dataset.data[0][indOpenPrice];
+                        share_line.open_price = api_result.dataset_data.data[0][indOpenPrice];
                     }
 
                     if (debug) {
@@ -313,7 +313,7 @@
 
                     // Calculate
                     share_line.virtual_capital = (share_line.current_price * share_line.quantity * (1-share_line.portfolio_share_fee_percent)) - share_line.portfolio_share_fee_fixed;
-console.log(share_line.current_price, share_line.quantity, (1-share_line.portfolio_share_fee_percent), share_line.portfolio_share_fee_fixed);
+
                     share_line.virtual_capital_gain = share_line.virtual_capital - share_line.capital;
                     share_line.virtual_gain_percent = share_line.virtual_capital_gain / share_line.capital * 100;
                     share_line.virtual_gain_loose_gain = 'loose';
@@ -330,12 +330,11 @@ console.log(share_line.current_price, share_line.quantity, (1-share_line.portfol
                         
                 
                 function reloadPrice(share_line) {
-                    changeDataValues(share_line);
-
-console.log(share_line);
-//return false;
                     $("tbody tr[data-share_symbol='"+share_line.share_symbol+"']").each(function () {
                         var data_line = $(this).data();
+                        data_line.current_price = share_line.current_price;
+                        data_line.open_price = share_line.open_price;
+                        changeDataValues(data_line);
                         
                         
                         // Current share
@@ -523,9 +522,9 @@ return false;
                 }
 
                 function getQuandlResult(symbol,result) {
-                    var current_price = result.dataset.data[0][4];
+                    var current_price = result.dataset_data.data[0][4];
                     
-                    return {'currentPrice' : current_price, 'change' : ((current_price - result.dataset.data[0][1]) / result.dataset.data[0][1] * 100)};
+                    return {'currentPrice' : current_price, 'change' : ((current_price - result.dataset_data.data[0][1]) / result.dataset_data.data[0][1] * 100)};
                 }
                 function getcryptoCompareResult(symbol,result) {
                     var current_price = Math.round((result.RAW[symbol]['EUR']['PRICE'] * 100)) / 100;
