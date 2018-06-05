@@ -305,7 +305,7 @@
                  * 
                  */
                 function changeDataValues(share_line) {
-                    share_line.current_percent =  (share_line.current_price - share_line.open_price) / share_line.open_price;
+                    share_line.current_percent =  (share_line.current_price - share_line.open_price) / share_line.open_price * 100;
                     share_line.current_loose_gain =  'loose';
                     if (0 < share_line.current_percent) {
                         share_line.current_loose_gain = 'gain';
@@ -335,69 +335,43 @@
                         data_line.current_price = share_line.current_price;
                         data_line.open_price = share_line.open_price;
                         changeDataValues(data_line);
-                        
-                        
+
                         // Current share
-                        $(this).find('td.current_price .refresh').html(pliciRound(share_line.current_price));
-                        $(this).find('td.current_percent .refresh').html(pliciRound(share_line.current_percent));
+                        $(this).find('td.current_price .refresh').html(pliciRound(data_line.current_price));
+                        $(this).find('td.current_percent .refresh').html(pliciRound(data_line.current_percent));
                         var percent_lg = "loose";
-                        if (0 < share_line.current_percent) {
+                        if (0 < data_line.current_percent) {
                             percent_lg = "gain";
                         }
                         $(this).find('td.current_percent').attr('data-loose_gain', percent_lg);
                         
                         // Virtual capital
-                        $(this).find('td.virtual_capital .refresh').html(pliciRound(share_line.virtual_capital));
+                        $(this).find('td.virtual_capital .refresh').html(pliciRound(data_line.virtual_capital));
                         
-                        // Set current price
-//                        $(this).find('[data-current_unit_price]').data('current_unit_price', apiData.currentPrice);
-//                        
-//                        $(this).find('[data-current_percent]').data('current_percent', apiData.change);
-//                        $(this).find('[data-current_percent]').html(Math.round(apiData.change * 100) / 100);
-//                        var current_percent = "loose";
-//                        if (0 < apiData.change) {
-//                            current_percent = "gain";
-//                        }
-//                        $(this).find('[data-current_percent]').parent().attr('data-loose_gain',current_percent);
-//                        
-//                        var shareInfo = getShareLineInfo($(this), apiData);
-//                        if (debug) {
-//                            shareInfo.method = 'updateShareLine';
-//                            console.log(shareInfo);
-//                        }
-//                        
-//                        var virtual_capital_gain_lg = "loose";
-//                        if (0 < shareInfo.virtual_capital_gain) {
-//                            virtual_capital_gain_lg = "gain";
-//                        }
-//                        var overall_capital_lg = "loose";
-//                        if (0 < shareInfo.overall_gain) {
-//                            overall_capital_lg = "gain";
-//                        }
-//
-//                        // Set Virtual capital
-//                        $(this).find('[data-virtual_capital]').data('virtual_capital', shareInfo.virtual_capital);
-//                        $(this).find('[data-virtual_capital]').html(Math.round((shareInfo.virtual_capital * 100)) / 100);
-//                        
-//                        // Set Virtual capital gain
-//                        $(this).find('[data-virtual_capital_gain]').data('virtual_capital_gain', shareInfo.virtual_capital_gain);
-//                        $(this).find('[data-virtual_capital_gain]').html(Math.round((shareInfo.virtual_capital_gain * 100)) / 100);
-//                        $(this).find('[data-virtual_capital_gain]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
-//                        
-//                        // Set Virtual capital gain percent
-//                        $(this).find('[data-virtual_gain_percent]').data('virtual_gain_percent', shareInfo.virtual_gain_percent);
-//                        $(this).find('[data-virtual_gain_percent]').html(Math.round((shareInfo.virtual_gain_percent * 100)) / 100);
-//                        $(this).find('[data-virtual_gain_percent]').parent().attr('data-loose_gain',virtual_capital_gain_lg);
-//
-//                        // Set overall gain
-//                        $(this).find('[data-overall_gain]').data('overall_gain', shareInfo.overall_gain);
-//                        $(this).find('[data-overall_gain]').html(Math.round((shareInfo.overall_gain * 100)) / 100);
-//                        $(this).find('[data-overall_gain]').parent().attr('data-loose_gain',overall_capital_lg);
-//                        
-//                        // Set overall percent
-//                        $(this).find('[data-overall_percent]').data('overall_percent', shareInfo.overall_percent);
-//                        $(this).find('[data-overall_percent]').html(Math.round((shareInfo.overall_percent * 100)) / 100);
-//                        $(this).find('[data-overall_percent]').parent().attr('data-loose_gain',overall_capital_lg);
+                        // Virtual capital gain
+                        $(this).find('td.virtual_capital_gain .refresh').html(pliciRound(data_line.virtual_capital_gain));
+                        var virtual_captal_gain_lg = "loose";
+                        if (0 < data_line.virtual_capital_gain) {
+                            virtual_captal_gain_lg = "gain";
+                        }
+                        $(this).find('td.virtual_capital_gain').attr('data-loose_gain', virtual_captal_gain_lg);
+
+                        // Virtual capital percent 
+                        $(this).find('td.virtual_capital_percent .refresh').html(pliciRound(data_line.virtual_gain_percent));
+                        $(this).find('td.virtual_capital_percent').attr('data-loose_gain', virtual_captal_gain_lg);
+
+                        
+                        // Overall capital gain
+                        $(this).find('td.overall_gain .refresh').html(pliciRound(data_line.overall_gain));
+                        var overall_gain = "loose";
+                        if (0 < data_line.overall_gain) {
+                            overall_gain = "gain";
+                        }
+                        $(this).find('td.overall_gain').attr('data-loose_gain', overall_gain);
+                        
+                        // Overall capital percent
+                        $(this).find('td.overall_percent .refresh').html(pliciRound(data_line.overall_percent));
+                        $(this).find('td.overall_percent').attr('data-loose_gain', overall_gain);
                     });
                 }
                 

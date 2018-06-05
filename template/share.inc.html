@@ -164,19 +164,19 @@
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
             <td class="virtual_capital_gain" data-loose_gain="neutral">
-                <span data-virtual_capital_gain="" class="refresh"></span>
+                <span class="refresh"></span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
-            <td class="virtual_gain_percent" data-loose_gain="neutral">
-                <span data-virtual_gain_percent="" class="refresh"></span>
+            <td class="virtual_capital_percent" data-loose_gain="neutral">
+                <span class="refresh"></span>
                 <?php echo ($user_share_line->quantity?'%':'-'); ?>
             </td>
             <td class="overall_gain" data-loose_gain="neutral">
-                <span data-overall_gain="" class="refresh"></span>
+                <span class="refresh"></span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
             <td class="overall_percent" data-loose_gain="neutral">
-                <span data-overall_percent="" class="refresh"></span>
+                <span class="refresh"></span>
                 <?php echo ($user_share_line->quantity?'%':'-'); ?>
             </td>
         </tr>
