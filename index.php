@@ -4,6 +4,7 @@ include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/Market.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/Portfolio.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/Share.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/Share_Webservice.php';
+include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/Tab.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/Transaction.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/User.php';
 include __DIR__.'/src/PNicolas/PortfolioBundle/Entity/User_Portfolio.php';

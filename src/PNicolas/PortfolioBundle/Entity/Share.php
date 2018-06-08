@@ -10,6 +10,9 @@ class Share {
 	public $market = null;
 	public $symbol = null;
 	
+	public $current_price = null;
+	public $open_price = null;
+	
 	/**
 	 * Set object
 	 * @param string $id

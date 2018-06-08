@@ -6,6 +6,7 @@
  */
 class User_Share_Line {
 
+	public $name = null;
     public $share = null;
     public $portfolio = null;
 
