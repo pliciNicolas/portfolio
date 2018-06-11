@@ -9,7 +9,7 @@
 class Tab {
 	public $id = null;
 	public $name = null;
-	public $type = null;
+	public $type = 'tab';
 	
 	/* Tab may contain subtab or lines+total - Not twice */
 	public $subTab = [];

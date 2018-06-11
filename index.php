@@ -28,6 +28,7 @@ try {
 	
 	$templateVar = [];
 	$templateVar['user'] = $dashboard->user;
+	$templateVar['tabs'] = $dashboard->tabs;
 	
 } catch (Exception $ex) {
 	echo $ex->getMessage();

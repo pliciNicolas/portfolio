@@ -1,0 +1,24 @@
+<h1>Bonjour <?php echo $current_tabs->name; ?></h1>
+
+<?php
+
+    if (0<count($current_tabs->subTab)) {
+?>
+<div class="tabs">
+            <ul>
+                <?php foreach($current_tabs->subTab as $id => $subtab) { ?>
+                <li><a href="#<?php echo $id; ?>"><?php echo $subtab->name; ?></a></li>
+                <?php } ?>
+            </ul>
+            <?php 
+            foreach($current_tabs->subTab as $id => $subtab) { 
+            echo $subtab->type;
+                $current_tab = $subtab;
+                include (__DIR__.'/'.$subtab->type.'.inc.html');
+            } 
+            ?>
+</div>
+            
+<?php
+    }
+?>
