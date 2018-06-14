@@ -48,6 +48,12 @@ class User_Share_Line {
 	 * @param \Transaction $transaction
 	 */
 	public function addTransaction(\Transaction $transaction) {
+		if (is_null($this->share)) {
+			$this->share = $transaction->share;
+		}
+		if (is_null($this->portfolio)) {
+			$this->portfolio = $transaction->portfolio;
+		}
 		switch($transaction->type) {
 			case Transaction::TYPE_BUY : 
 				$this->addBuy($transaction->unit_price, $transaction->quantity, $transaction->fee_fixed, $transaction->fee_percent, $transaction->date);

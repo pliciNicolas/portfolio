@@ -110,7 +110,6 @@ class DashboardController {
 		$this->tabs = new Tab();
 		$this->tabs->id = 'root';
 		$this->tabs->name = 'Nicolas SOTRON';
-		$this->tabs->type = 'root';
 
 		$this->tabs->subTab['dashboard'] = new Tab();
 		$this->tabs->subTab['dashboard']->id = 'dashboard';
@@ -232,15 +231,16 @@ class DashboardController {
 				$share_status = 'unactive';
 				if ($tmp_share[$transaction->share->id]->quantity) {
 					$share_status = 'active';
+					
+					$line_dashboard_id = $transaction->share->id.'_'.$transaction->portfolio->id;
+					if (!array_key_exists($line_dashboard_id, $this->tabs->subTab['dashboard']->data)) {
+						$this->tabs->subTab['dashboard']->data[$line_dashboard_id] = new User_Share_Line();
+						$this->tabs->subTab['dashboard']->data[$line_dashboard_id]->name = $transaction->share->name.' / '.$transaction->portfolio->name;
+					}
+					$this->tabs->subTab['dashboard']->data[$line_dashboard_id]->addTransaction($transaction);
+					$this->tabs->subTab['dashboard']->total->addTransaction($transaction);
 				}
-				
-				$line_dashboard_id = $transaction->share->id.'_'.$transaction->portfolio->id;
-				if (!array_key_exists($line_dashboard_id, $this->tabs->subTab['dashboard']->data)) {
-					$this->tabs->subTab['dashboard']->data[$line_dashboard_id] = new User_Share_Line();
-					$this->tabs->subTab['dashboard']->data[$line_dashboard_id]->name = $transaction->share->name.' / '.$transaction->portfolio->name;
-				}
-				$this->tabs->subTab['dashboard']->data[$line_dashboard_id]->addTransaction($transaction);
-				$this->tabs->subTab['dashboard']->total->addTransaction($transaction);
+
 				
 				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['shares']->subTab['resume']->data)) {
 					$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id] = new User_Share_Line();

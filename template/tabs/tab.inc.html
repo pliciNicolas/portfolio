@@ -1,28 +1,36 @@
-<div id="<?php echo $current_tab->name; ?>" class='tabs'>
+<?php
+    $tab_current_tab = $current_tab;
+?>
+<div id='<?php echo $tab_current_tab->id;?>'>
+
 <?php
 
-    if (0<count($current_tabs->subTab)) {
+    if (0<count($tab_current_tab->subTab)) {
 ?>
-<div class="tabs">
-            <ul>
-                <?php foreach($current_tab->subTab as $id => $subtab) { ?>
-                <li><a href="#<?php echo $id; ?>"><?php echo $subtab->name; ?></a></li>
-                <?php } ?>
-            </ul>
-            <?php 
-            foreach($current_tabs->subTab as $id => $subtab) { 
-            echo $subtab->type;
-                $current_tab = $subtab;
-                //include (__DIR__.'/'.$subtab->type.'.inc.html');
-            } 
-            ?>
-</div>
+    <div class="tabs">
+        <ul>
+            <?php foreach($tab_current_tab->subTab as $id => $subtab) { ?>
+            <li><a href="#<?php echo $id; ?>"><?php echo $subtab->name; ?></a></li>
+            <?php } ?>
+        </ul>
+        <?php 
+        foreach($tab_current_tab->subTab as $id => $subtab) { 
+            $current_tab = $subtab;
+            echo '<div id="'.$id.'" >';
+            if (file_exists(__DIR__.'/'.$subtab->type.'.inc.html')) {
+                include (__DIR__.'/'.$subtab->type.'.inc.html');
+            }
+            echo '</div>';
+        } 
+        ?>
+    </div>
             
 <?php
     }
 
-    if (0 < count($current_tab->data)) {
-        //include (__DIR__.'/table.inc.html');
+    if (0 < count($tab_current_tab->data)) {
+        include (__DIR__.'/table.inc.html');
     }
 ?>
+
 </div>

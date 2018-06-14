@@ -1,1 +1,36 @@
-Coucou
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Portfolio</th>
+            <th>Share</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Type</th>
+            <th>Fee Fixed</th>
+            <th>Fee percent</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        foreach ($current_tab->data as $transaction) {
+        ?>
+        <tr 
+            data-id_share="<?php echo $transaction->share->id; ?>"
+            data-id_portfolio="<?php echo $transaction->portfolio->id; ?>"
+            data-type="<?php echo $transaction->type; ?>"
+        >
+            <th class="date"><?php echo $transaction->date->format('d/m/Y'); ?></th>
+            <th class="portfolio"><?php echo $transaction->portfolio->name; ?></th>
+            <th class="share"><?php echo $transaction->share->name; ?></th>
+            <th class="quantity"><?php echo $transaction->quantity; ?></th>
+            <th class="unit_price"><?php echo $transaction->unit_price; ?></th>
+            <th class="type"><?php echo $transaction->type; ?></th>
+            <th class="fee_fixed"><?php echo $transaction->fee_fixed; ?></th>
+            <th class="fee_percent"><?php echo $transaction->fee_percent; ?></th>
+        </tr>
+        <?php 
+        }
+        ?>
+    </tbody>
+</table>

@@ -925,8 +925,8 @@ return false;
         <hr />
         
         <?php
-        $current_tabs = $templateVar['tabs'];
-        include(__DIR__.'/tabs/'.$current_tabs->type.'.inc.html');
+        $current_tab = $templateVar['tabs'];
+        include(__DIR__.'/tabs/'.$current_tab->type.'.inc.html');
         ?>
     </body>
 </html>

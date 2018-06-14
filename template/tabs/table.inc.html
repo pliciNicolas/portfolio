@@ -1,0 +1,310 @@
+<table class="tablesorter">
+    <thead>
+        <tr>
+            <th class="type_name"><?php echo ucfirst($type); ?></th>
+            <th class="dividend_amount" title="Dividend"><i class="fas fa-gift"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="dividend_count" title="Dividend count"><i class="fas fa-gift"></i> <i class="fas fa-list-ol"></i></th>
+            <th class="dividend_average" title="Dividend average"><i class="fas fa-gift"></i> <i class="far fa-compass"></i></th>
+            <th class="dividend_percent" title="Dividend percent"><i class="fas fa-gift"></i> <i class="fas fa-percent"></i></th>
+            <th class="dividend_per_year" title="Dividend / share / year"><i class="fas fa-gift"></i> <i class="far fa-calendar"></i></th>
+            <th class="holding" title="Holding"><i class="far fa-calendar-alt"></i></th>
+            <th class="capital_gain_price" title="Capital gain"><i class="far fa-handshake"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="capital_gain_count" title="Capital gain count"><i class="far fa-handshake"></i> <i class="fas fa-list-ol"></i></th>
+            <th class="capital_gain_percent" title="Capital gain percent"><i class="far fa-handshake"></i> <i class="fas fa-percent"></i></th>
+            <th class="gain_price" title="Gain"><i class="fas fa-trophy"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="gain_percent" title="Gain percent"><i class="fas fa-trophy"></i> <i class="fas fa-percent"></th>
+            <th class="balance" title="Balance"><i class="fas fa-balance-scale"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="capital" title="Capital"><i class="fas fa-piggy-bank"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="quantity" title="Quantity"><i class="fas fa-list-ol"></i></th>
+            <th class="buying_unit_price" title="Buying unit price"><i class="fas fa-shopping-cart"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="current_price" title="Current price"><i class="far fa-clock"></i> <i class="far fa-money-bill-alt"></th>
+            <th class="current_change" title="Current change"><i class="far fa-clock"></i> <i class="fas fa-percent"></th>
+            <th class="virtual_capital" title="Virtual capital"><i class="fas fa-cloud"></i> <i class="fas fa-piggy-bank"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="virtual_capital_gain" title="Virtual capital gain"><i class="fas fa-cloud"></i> <i class="fas fa-trophy"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="virtual_gain_percent" title="Virtual capital percent"><i class="fas fa-cloud"></i> <i class="fas fa-trophy"></i> <i class="fas fa-percent"></i></th>
+            <th class="overall_gain" title="Overall gain"><i class="fas fa-flag-checkered"></i> <i class="far fa-money-bill-alt"></i></th>
+            <th class="overall_percent" title="Overall percent"><i class="fas fa-flag-checkered"></i> <i class="fas fa-percent"></i></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        foreach ($tab_current_tab->data as $user_share_line) {
+        ?>
+        <tr 
+            data-line_type="<?php echo ($type); ?>"
+            
+            data-open_price=null
+            data-current_price=null
+            data-current_percent=null
+            data-current_loose_gain=null
+            data-virtual_capital=null
+            data-virtual_capital_gain=null
+            data-overall_gain=null
+            data-virtual_gain_percent=null
+            data-virtual_gain_loose_gain=null
+            data-overall_percent=null
+            data-overall_loose_gain=null
+            
+            
+            
+            data-id_share="<?php echo ('share'==$type?$user_share_line->share->id:''); ?>"
+            data-share_active="<?php echo ('share'==$type && $user_share_line->quantity?'active':'unactive'); ?>"
+            data-share_symbol="<?php echo ('share'==$type?$user_share_line->share->symbol:''); ?>"
+            data-share_openmarket="<?php echo ('share'==$type?$user_share_line->share->market->openHours:''); ?>"
+            data-share_webservice="<?php echo ('share'==$type?$user_share_line->share->market->webservice->codeName:''); ?>"
+
+            
+            data-id_portfolio="<?php echo (is_null($user_share_line->portfolio)?'':$user_share_line->portfolio->id); ?>"
+            
+            data-portfolio_share_fee_fixed="<?php echo (isset($user_share_line->portfolio->fee_fixed)?$user_share_line->portfolio->fee_fixed:0); ?>"
+            data-portfolio_share_fee_percent="<?php echo (isset($user_share_line->portfolio->fee_percent)?$user_share_line->portfolio->fee_percent:0); ?>"
+            data-quantity="<?php echo $user_share_line->quantity; ?>"
+            data-capital="<?php echo $user_share_line->capital; ?>"
+            data-share_url="<?php echo ('portfolio'!=$type?$user_share_line->share->market->webservice->getUrl($user_share_line->share->symbol):''); ?>"
+            data-gain_price="<?php echo $user_share_line->gain_price; ?>"
+            data-buying_unit_price="<?php echo $user_share_line->unit_price; ?>"
+            >
+            <td class="type_name">
+                <?php echo $user_share_line->name; ?>
+            </td>
+            <td class="dividend_amount" data-loose_gain="<?php echo ($user_share_line->dividend_price?'gain':'neutral'); ?>">
+                <?php echo $user_share_line->dividend_price; ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="dividend_count">
+                <?php echo ($user_share_line->dividend_price?$user_share_line->dividend_count:'-'); ?>
+            </td>
+            <td class="dividend_average" data-loose_gain="<?php echo ($user_share_line->dividend_price?'gain':'neutral'); ?>">
+            <?php
+                if ( $user_share_line->dividend_price) {
+                    echo $user_share_line->dividend_average;
+                    echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency);
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="dividend_percent" data-loose_gain="<?php echo ($user_share_line->dividend_price?'gain':'neutral'); ?>">
+            <?php
+                if ( $user_share_line->dividend_price) {
+                    echo $user_share_line->dividend_percent.' %';
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="dividend_per_year" data-loose_gain="<?php echo ($user_share_line->dividend_price?'gain':'neutral'); ?>">
+            <?php
+                if ( $user_share_line->dividend_price) {
+                    echo $user_share_line->dividend_per_share_per_year;
+                    echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency);
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="holding">
+                <?php echo $user_share_line->getHolding(); ?>
+            </td>
+            <td class="capital_gain_price" data-loose_gain="<?php echo (0<$user_share_line->capitalGain_price?'gain':(0>$user_share_line->capitalGain_price?'loose':'neutral')); ?>">
+                <?php echo $user_share_line->capitalGain_price; ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="capital_gain_count">
+            <?php
+                if ( $user_share_line->capitalGain_price) {
+                    echo $user_share_line->capitalGain_count;
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="capital_gain_percent" data-loose_gain="<?php echo (0<$user_share_line->capitalGain_price?'gain':(0>$user_share_line->capitalGain_price?'loose':'neutral')); ?>">
+            <?php
+                if ( $user_share_line->capitalGain_price) {
+                    echo $user_share_line->capitalGain_percent.' %';
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="gain_price" data-loose_gain="<?php echo (0<$user_share_line->gain_price?'gain':(0>$user_share_line->gain_price?'loose':'neutral')); ?>">
+                <?php echo $user_share_line->gain_price; ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="gain_percent" data-loose_gain="<?php echo (0<$user_share_line->gain_price?'gain':(0>$user_share_line->gain_price?'loose':'neutral')); ?>">
+                <?php echo $user_share_line->gain_percent; ?>
+                %
+            </td>
+            <td class="balance" data-loose_gain="<?php echo (0<$user_share_line->balance?'gain':(0>$user_share_line->balance?'loose':'neutral')); ?>">
+                <?php echo round($user_share_line->balance,2); ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="capital">
+                <?php echo round($user_share_line->capital,2); ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="quantity">
+                <?php echo $user_share_line->quantity; ?>
+            </td>
+            <td class="buying_unit_price">
+                <?php echo $user_share_line->unit_price; ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="current_price">
+                <span class="refresh"></span>
+                <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
+            </td>
+            <td class="current_percent" data-loose_gain="neutral">
+                <span class="refresh"></span>
+                <?php echo ($user_share_line->quantity?'%':'-'); ?>
+            </td>
+            <td class="virtual_capital">
+                <span class="refresh"></span>
+                <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
+            </td>
+            <td class="virtual_capital_gain" data-loose_gain="neutral">
+                <span class="refresh"></span>
+                <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
+            </td>
+            <td class="virtual_capital_percent" data-loose_gain="neutral">
+                <span class="refresh"></span>
+                <?php echo ($user_share_line->quantity?'%':'-'); ?>
+            </td>
+            <td class="overall_gain" data-loose_gain="neutral">
+                <span class="refresh"></span>
+                <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
+            </td>
+            <td class="overall_percent" data-loose_gain="neutral">
+                <span class="refresh"></span>
+                <?php echo ($user_share_line->quantity?'%':'-'); ?>
+            </td>
+        </tr>
+        <?php 
+        }
+        ?>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td class='total'>
+                Total
+            </td>
+            <td class='dividend_amount' data-loose_gain="<?php echo ($current_tab->total->dividend_price?'gain':'neutral'); ?>">
+                <?php echo $current_tab->total->dividend_price; ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class='dividend_count'>
+            <?php
+                if ( $current_tab->total->dividend_price) {
+                    echo $current_tab->total->dividend_count;
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="dividend_average" data-loose_gain="<?php echo ($current_tab->total->dividend_price?'gain':'neutral'); ?>">
+            <?php
+                if ( $current_tab->total->dividend_price) {
+                    echo $current_tab->total->dividend_average;
+                    echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency);
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="dividend_percent" data-loose_gain="<?php echo ($current_tab->total->dividend_price?'gain':'neutral'); ?>">
+            <?php
+                if ( $current_tab->total->dividend_price) {
+                    echo $current_tab->total->dividend_percent.' %';
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="dividend_per_year" data-loose_gain="<?php echo ($current_tab->total->dividend_price?'gain':'neutral'); ?>">
+            <?php
+                if ( $current_tab->total->dividend_price) {
+                    echo $current_tab->total->dividend_per_share_per_year;
+                    echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency);
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="holding">
+                <?php echo $current_tab->total->getHolding(); ?>
+            </td>
+            <td class="capital_gain_price" data-loose_gain="<?php echo (0<$current_tab->total->capitalGain_price?'gain':(0>$current_tab->total->capitalGain_price?'loose':'neutral')); ?>">
+                <?php echo $current_tab->total->capitalGain_price; ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="capital_gain_count" data-loose_gain="<?php echo (0<$current_tab->total->capitalGain_price?'gain':(0>$current_tab->total->capitalGain_price?'loose':'neutral')); ?>">
+            <?php
+                if ( $current_tab->total->capitalGain_price) {
+                    echo $current_tab->total->capitalGain_count;
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="capital_gain_percent" data-loose_gain="<?php echo (0<$current_tab->total->capitalGain_price?'gain':(0>$current_tab->total->capitalGain_price?'loose':'neutral')); ?>">
+            <?php
+                if ( $current_tab->total->capitalGain_price) {
+                    echo $current_tab->total->capitalGain_percent.' %';
+                } else {
+                    echo '-';
+                }
+            ?>
+            </td>
+            <td class="gain_price" data-loose_gain="<?php echo (0<$current_tab->total->gain_price?'gain':(0>$current_tab->total->gain_price?'loose':'neutral')); ?>">
+                <?php echo $current_tab->total->gain_price; ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="gain_percent" data-loose_gain="<?php echo (0<$current_tab->total->gain_price?'gain':(0>$current_tab->total->gain_price?'loose':'neutral')); ?>">
+                <?php echo $current_tab->total->gain_percent; ?>
+                %
+            </td>
+            <td class="balance" data-loose_gain="<?php echo (0<$current_tab->total->balance?'gain':(0>$current_tab->total->balance?'loose':'neutral')); ?>">
+                <?php echo round($current_tab->total->balance,2); ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="capital">
+                <?php echo round($current_tab->total->capital,2); ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="quantity">
+                <?php echo $current_tab->total->quantity; ?>
+            </td>
+            <td class="buying_unit_price">
+                <?php echo $current_tab->total->unit_price; ?>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td class="current_price">
+                -
+            </td>
+            <td class="current_percent">
+                -
+            </td>
+            <td data-loose_gain="neutral" class="virtual_capital">
+                <span data-virtual_capital="" class="refresh"></span>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td data-loose_gain="neutral" class="virtual_capital_gain">
+                <span data-virtual_capital_gain="" class="refresh"></span>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td data-loose_gain="neutral" class="virtual_gain_percent">
+                <span data-virtual_gain_percent="" class="refresh"></span>
+                %
+            </td>
+            <td data-loose_gain="neutral" class="overall_gain">
+                <span data-overall_gain="" class="refresh"></span>
+                <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
+            </td>
+            <td data-loose_gain="neutral" class="overall_percent">
+                <span data-overall_percent="" class="refresh"></span>
+                %
+            </td>
+        </tr>
+    </tfoot>
+</table>
