@@ -20,14 +20,14 @@
             data-id_portfolio="<?php echo $transaction->portfolio->id; ?>"
             data-type="<?php echo $transaction->type; ?>"
         >
-            <th class="date"><?php echo $transaction->date->format('d/m/Y'); ?></th>
-            <th class="portfolio"><?php echo $transaction->portfolio->name; ?></th>
-            <th class="share"><?php echo $transaction->share->name; ?></th>
-            <th class="quantity"><?php echo $transaction->quantity; ?></th>
-            <th class="unit_price"><?php echo $transaction->unit_price; ?></th>
-            <th class="type"><?php echo $transaction->type; ?></th>
-            <th class="fee_fixed"><?php echo $transaction->fee_fixed; ?></th>
-            <th class="fee_percent"><?php echo $transaction->fee_percent; ?></th>
+            <td class="date"><?php echo $transaction->date->format('d/m/Y'); ?></td>
+            <td class="portfolio"><?php echo $transaction->portfolio->getDisplay(); ?></td>
+            <td class="share"><?php echo $transaction->share->getDisplay(); ?></td>
+            <td class="quantity"><?php echo $transaction->quantity; ?></td>
+            <td class="unit_price"><?php echo $transaction->unit_price; ?></td>
+            <td class="type"><?php echo $transaction->type; ?></td>
+            <td class="fee_fixed"><?php echo $transaction->fee_fixed; ?></td>
+            <td class="fee_percent"><?php echo $transaction->fee_percent; ?></td>
         </tr>
         <?php 
         }

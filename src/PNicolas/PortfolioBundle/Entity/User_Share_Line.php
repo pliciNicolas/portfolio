@@ -7,6 +7,7 @@
 class User_Share_Line {
 
 	public $name = null;
+	public $display = null;
     public $share = null;
     public $portfolio = null;
 
@@ -120,7 +121,7 @@ class User_Share_Line {
 			$data = $this->date_last_first_buying->diff($now);
 		}
 		
-		return $data->format('%YY %mM %dD');
+		return '<span title="'.$data->format('%YY %mM %dD').'">'.$data->format('%a D').'</span>';
 	}
 			
 

@@ -63,9 +63,10 @@
             data-share_url="<?php echo ('portfolio'!=$type?$user_share_line->share->market->webservice->getUrl($user_share_line->share->symbol):''); ?>"
             data-gain_price="<?php echo $user_share_line->gain_price; ?>"
             data-buying_unit_price="<?php echo $user_share_line->unit_price; ?>"
+            
             >
             <td class="type_name">
-                <?php echo $user_share_line->name; ?>
+                <?php echo $user_share_line->display; ?>
             </td>
             <td class="dividend_amount" data-loose_gain="<?php echo ($user_share_line->dividend_price?'gain':'neutral'); ?>">
                 <?php echo $user_share_line->dividend_price; ?>

@@ -25,7 +25,7 @@ class DashboardController {
 		foreach($data['portfolio'] as $portfolios_item) {
 			if ($this->user->id == $portfolios_item['id_user']) {
 				$portfolio = new Portfolio();
-				$portfolio->set($portfolios_item['id'], $portfolios_item['name'], $portfolios_item['fee_fixed'], $portfolios_item['fee_percent'], $portfolios_item['currency'] );
+				$portfolio->set($portfolios_item['id'], $portfolios_item['name'], $portfolios_item['fee_fixed'], $portfolios_item['fee_percent'], $portfolios_item['currency'], $portfolios_item['color'], $portfolios_item['logo'] );
 				$portfolios[$portfolios_item['id']] = $portfolio;
 			}
 		}
@@ -74,7 +74,7 @@ class DashboardController {
 		}
 		foreach($data['share'] as $share_item) {
 			$share = new Share();
-			$share->set($share_item['id'], $share_item['name'], $markets[$share_item['id_market']], Share_Webservice::get($share_item['id'], $markets[$share_item['id_market']]->webservice->id) );
+			$share->set($share_item['id'], $share_item['name'], $markets[$share_item['id_market']], Share_Webservice::get($share_item['id'], $markets[$share_item['id_market']]->webservice->id), $share_item['color'], $share_item['logo'] );
 			$shares[$share_item['id']] = $share;
 		}
 
@@ -193,12 +193,17 @@ class DashboardController {
 				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['shares']->subTab['resume']->data)) {
 					$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id] = new User_Share_Line();
 					$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id]->name = $transaction->share->name;
+					$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id]->display = $transaction->share->getDisplay();
+					// Order
+					uasort($this->tabs->subTab['shares']->subTab['resume']->data, function($a, $b) {
+						return strcasecmp($a->name,  $b->name);
+					});
 					$tmp_share[$transaction->share->id] = new User_Share_Line();
 				}
 				$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id]->addTransaction($transaction);
 				$this->tabs->subTab['shares']->subTab['resume']->total->addTransaction($transaction);
 				$tmp_share[$transaction->share->id]->addTransaction($transaction);
-				
+
 					// Portfolio
 				if(!array_key_exists($transaction->portfolio->id, $this->tabs->subTab['portfolios']->subTab['resume']->data)) {
 					$this->tabs->subTab['portfolios']->subTab['resume']->data[$transaction->portfolio->id] = new User_Share_Line();
@@ -216,7 +221,6 @@ class DashboardController {
 					$portfolio_active = $portfolio_active && $share_detail->quantity;
 				}
 				$tmp_portfolio[$transaction->portfolio->id]['active_status'] = $portfolio_active?'active':'unactive';
-				
 				
 					// Historic
 				$this->tabs->subTab['historic']->data[] = $transaction;
@@ -236,97 +240,102 @@ class DashboardController {
 					if (!array_key_exists($line_dashboard_id, $this->tabs->subTab['dashboard']->data)) {
 						$this->tabs->subTab['dashboard']->data[$line_dashboard_id] = new User_Share_Line();
 						$this->tabs->subTab['dashboard']->data[$line_dashboard_id]->name = $transaction->share->name.' / '.$transaction->portfolio->name;
+						$this->tabs->subTab['dashboard']->data[$line_dashboard_id]->display = $transaction->share->getDisplay().' '.$transaction->portfolio->getDisplay();
+						// Order
+						uasort($this->tabs->subTab['dashboard']->data, function($a, $b) {
+							return strcasecmp($a->name,  $b->name);
+						});
 					}
 					$this->tabs->subTab['dashboard']->data[$line_dashboard_id]->addTransaction($transaction);
 					$this->tabs->subTab['dashboard']->total->addTransaction($transaction);
 				}
 
 				
-				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['shares']->subTab['resume']->data)) {
-					$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id] = new User_Share_Line();
-					$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id]->name = $transaction->share->name;
-				}
-				$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id]->addTransaction($transaction);
-				$this->tabs->subTab['shares']->subTab['resume']->total->addTransaction($transaction);
-
-
-				$tab_share_id = 'shares_'.$share_status.'_'.$transaction->share->id;
-				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->data)) {
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->data[$tab_share_id] = new User_Share_Line();
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->data[$tab_share_id]->name = $transaction->share->name;
-					
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id] = new Tab();
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->id = $tab_share_id;
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->name = $transaction->share->name;
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->total = new User_Share_Line();
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->total->name = 'Total';
-				}
-				$this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->data[$tab_share_id]->addTransaction($transaction);
-				$this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->total->addTransaction($transaction);
-				$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->total->addTransaction($transaction);
-				
-				if (!array_key_exists($transaction->portfolio->id, $this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->data)) {
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->data[$transaction->portfolio->id] = new User_Share_Line();
-					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->data[$transaction->portfolio->id]->name = $transaction->portfolio->name;
-				}
-				$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->data[$transaction->portfolio->id]->addTransaction($transaction);
-				
+//				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['shares']->subTab['resume']->data)) {
+//					$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id] = new User_Share_Line();
+//					$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id]->name = $transaction->share->name;
+//				}
+//				$this->tabs->subTab['shares']->subTab['resume']->data[$transaction->share->id]->addTransaction($transaction);
+//				$this->tabs->subTab['shares']->subTab['resume']->total->addTransaction($transaction);
+//
+//
+//				$tab_share_id = 'shares_'.$share_status.'_'.$transaction->share->id;
+//				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->data)) {
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->data[$tab_share_id] = new User_Share_Line();
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->data[$tab_share_id]->name = $transaction->share->name;
+//					
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id] = new Tab();
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->id = $tab_share_id;
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->name = $transaction->share->name;
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->total = new User_Share_Line();
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->total->name = 'Total';
+//				}
+//				$this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->data[$tab_share_id]->addTransaction($transaction);
+//				$this->tabs->subTab['shares']->subTab[$share_status]->subTab['resume']->total->addTransaction($transaction);
+//				$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->total->addTransaction($transaction);
+//				
+//				if (!array_key_exists($transaction->portfolio->id, $this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->data)) {
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->data[$transaction->portfolio->id] = new User_Share_Line();
+//					$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->data[$transaction->portfolio->id]->name = $transaction->portfolio->name;
+//				}
+//				$this->tabs->subTab['shares']->subTab[$share_status]->subTab[$tab_share_id]->data[$transaction->portfolio->id]->addTransaction($transaction);
+//				
 				
 				// Portfolios tabs
-				$portfolio_status = 'unactive';
-				if ($tmp_portfolio[$transaction->portfolio->id]) {
-					$portfolio_status = 'active';
-				}
-				$tab_portfolio_id = 'portfolios_'.$portfolio_status.'_'.$transaction->portfolio->id;
-				if (!array_key_exists($transaction->portfolio->id, $this->tabs->subTab['portfolios']->subTab['resume']->data)) {
-					$this->tabs->subTab['portfolios']->subTab['resume']->data[$transaction->portfolio->id] = new User_Share_Line();
-					$this->tabs->subTab['portfolios']->subTab['resume']->data[$transaction->portfolio->id]->name = $transaction->portfolio->name;
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab['resume']->data[$transaction->portfolio->id] = new User_Share_Line();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab['resume']->data[$transaction->portfolio->id]->name = $transaction->portfolio->name;
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id] = new Tab();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->id = $tab_portfolio_id;
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->name = $transaction->portfolio->name;
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume'] = new Tab();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->id = $tab_portfolio_id.'_resume';
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->name = 'Resume';
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->total = new User_Share_Line();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->total->name = 'Total';
-					
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active'] = new Tab();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active']->id = $tab_portfolio_id.'_active';
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active']->name = 'Active';
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active']->total = new User_Share_Line();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active']->total->name = 'Total';
-					
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive'] = new Tab();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive']->id = $tab_portfolio_id.'_unactive';
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive']->name = 'Unactive';
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive']->total = new User_Share_Line();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive']->total->name = 'Total';
-				}
-				$this->tabs->subTab['portfolios']->subTab['resume']->data[$transaction->portfolio->id]->addTransaction($transaction);
-				$this->tabs->subTab['portfolios']->subTab['resume']->total->addTransaction($transaction);
-//				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab['resume']->data[$transaction->portfolio->id]->addTransaction($transaction);
-//				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab['resume']->total->addTransaction($transaction);
-				
-				$portfolio_share_status = 'unactive';
-				if ($tmp_portfolio[$transaction->portfolio->id]['shares'][$transaction->share->id]->quantity) {
-					$portfolio_share_status = 'active';
-				}
-				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->data)) {
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->data[$transaction->share->id] = new User_Share_Line();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->data[$transaction->share->id]->name = $transaction->share->name;
-				}
-//				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->data[$transaction->portfolio->id]->addTransaction($transaction);
-//				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->total->addTransaction($transaction);
-				
-				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->data)) {
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->data[$transaction->share->id] = new User_Share_Line();
-					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->data[$transaction->share->id]->name = $transaction->share->name;
-				}
-//				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->data[$transaction->share->id]->addTransaction($transaction);
-//				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->total->addTransaction($transaction);
-				
+//				$portfolio_status = 'unactive';
+//				if ($tmp_portfolio[$transaction->portfolio->id]) {
+//					$portfolio_status = 'active';
+//				}
+//				$tab_portfolio_id = 'portfolios_'.$portfolio_status.'_'.$transaction->portfolio->id;
+//				if (!array_key_exists($transaction->portfolio->id, $this->tabs->subTab['portfolios']->subTab['resume']->data)) {
+//					$this->tabs->subTab['portfolios']->subTab['resume']->data[$transaction->portfolio->id] = new User_Share_Line();
+//					$this->tabs->subTab['portfolios']->subTab['resume']->data[$transaction->portfolio->id]->name = $transaction->portfolio->name;
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab['resume']->data[$transaction->portfolio->id] = new User_Share_Line();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab['resume']->data[$transaction->portfolio->id]->name = $transaction->portfolio->name;
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id] = new Tab();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->id = $tab_portfolio_id;
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->name = $transaction->portfolio->name;
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume'] = new Tab();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->id = $tab_portfolio_id.'_resume';
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->name = 'Resume';
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->total = new User_Share_Line();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->total->name = 'Total';
+//					
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active'] = new Tab();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active']->id = $tab_portfolio_id.'_active';
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active']->name = 'Active';
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active']->total = new User_Share_Line();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['active']->total->name = 'Total';
+//					
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive'] = new Tab();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive']->id = $tab_portfolio_id.'_unactive';
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive']->name = 'Unactive';
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive']->total = new User_Share_Line();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['unactive']->total->name = 'Total';
+//				}
+//				$this->tabs->subTab['portfolios']->subTab['resume']->data[$transaction->portfolio->id]->addTransaction($transaction);
+//				$this->tabs->subTab['portfolios']->subTab['resume']->total->addTransaction($transaction);
+////				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab['resume']->data[$transaction->portfolio->id]->addTransaction($transaction);
+////				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab['resume']->total->addTransaction($transaction);
+//				
+//				$portfolio_share_status = 'unactive';
+//				if ($tmp_portfolio[$transaction->portfolio->id]['shares'][$transaction->share->id]->quantity) {
+//					$portfolio_share_status = 'active';
+//				}
+//				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->data)) {
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->data[$transaction->share->id] = new User_Share_Line();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->data[$transaction->share->id]->name = $transaction->share->name;
+//				}
+////				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->data[$transaction->portfolio->id]->addTransaction($transaction);
+////				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab['resume']->total->addTransaction($transaction);
+//				
+//				if (!array_key_exists($transaction->share->id, $this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->data)) {
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->data[$transaction->share->id] = new User_Share_Line();
+//					$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->data[$transaction->share->id]->name = $transaction->share->name;
+//				}
+////				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->data[$transaction->share->id]->addTransaction($transaction);
+////				$this->tabs->subTab['portfolios']->subTab[$portfolio_status]->subTab[$transaction->portfolio->id]->subTab[$portfolio_share_status]->total->addTransaction($transaction);
+//				
 				
 			}
 		}
