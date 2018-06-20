@@ -38,6 +38,15 @@ class User_Share_Line {
 	
     public $balance = 0; // Sum of all add and minus (Buying + Sell + Dividend)
 
+	public $current_price = null;
+	public $current_change = null;
+	
+	public $virtual_capital = null;
+	public $virtual_capital_gain = null;
+	public $virtual_capital_percent = null;
+	public $overall_gain = null;
+	public $overall_percent = null;
+	
     // Current capital
     public $quantity = 0; // Current quantity
     public $unit_price = 0; // Current unit price
@@ -51,6 +60,8 @@ class User_Share_Line {
 	public function addTransaction(\Transaction $transaction) {
 		if (is_null($this->share)) {
 			$this->share = $transaction->share;
+			$this->current_price = $this->share->current_price;
+			$this->current_change = $this->share->current_change;
 		}
 		if (is_null($this->portfolio)) {
 			$this->portfolio = $transaction->portfolio;

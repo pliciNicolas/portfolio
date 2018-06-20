@@ -4,6 +4,27 @@
  *
  */
 class Curl {
+	
+	public function doRequest($url) {
+		$method = 'GET';
+		$data_get = null;
+		$data_post = null;
+		$header_to_send =  array(
+			'Content-Type:application/json;charset="utf-8"',
+			'Accept:application/json',
+			'Cache-Control: no-cache',
+			'Pragma: no-cache',
+        );
+		$curl_options = array(
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_VERBOSE => 1,
+            CURLOPT_HEADER => 1,
+            CURLOPT_CONNECTTIMEOUT => 0,
+		);
+		
+		return $this->performRequest($url, $method, $data_get, $data_post, $header_to_send, $curl_options);
+	}
+	
 	public function performRequest($url, $method, $data_get, $data_post, $header_to_send, $curl_options)
     {
         

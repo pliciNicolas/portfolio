@@ -30,13 +30,19 @@ class DashboardController {
 			}
 		}
 		
+		$user_webservices = [];
+		foreach($data['user_webservice'] as $user_webservice_item) {
+			$user_webservices[$user_webservice_item['id_webservice']] = $user_webservice_item['api_key'];
+		}
+		
 		$webservices = [];
 		if (!(array_key_exists('webservice', $data) && is_array($data['webservice']) && 0<count($data['webservice']))) {
 			throw new Exception('Cant find webservice in data file');
 		}
 		foreach($data['webservice'] as $webservice_item) {
 			$webservice = new Webservice();
-			$webservice->set($webservice_item['id'], $webservice_item['name'], $webservice_item['url'], $webservice_item['codeName']);
+			$url = str_replace('@api_key@', $user_webservices[$webservice_item['id']], $webservice_item['url']);
+			$webservice->set($webservice_item['id'], $webservice_item['name'], $url, $webservice_item['codeName']);
 			$webservices[$webservice_item['id']] = $webservice;
 		}
 		
