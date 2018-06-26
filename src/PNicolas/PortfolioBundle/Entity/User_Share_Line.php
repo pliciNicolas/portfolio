@@ -40,11 +40,14 @@ class User_Share_Line {
 
 	public $current_price = null;
 	public $current_change = null;
+	public $current_loose_gain = null;
 	
 	public $virtual_capital = null;
 	public $virtual_capital_gain = null;
+	public $virtual_capital_loose_gain = 'neutral';
 	public $virtual_capital_percent = null;
 	public $overall_gain = null;
+	public $overall_loose_gain = 'neutral';
 	public $overall_percent = null;
 	
     // Current capital
@@ -61,7 +64,8 @@ class User_Share_Line {
 		if (is_null($this->share)) {
 			$this->share = $transaction->share;
 			$this->current_price = $this->share->current_price;
-			$this->current_change = $this->share->current_change;
+			$this->current_change = round($this->share->current_change,2);
+			$this->current_loose_gain = $this->getLooseOrGain($this->current_change);
 		}
 		if (is_null($this->portfolio)) {
 			$this->portfolio = $transaction->portfolio;
@@ -78,6 +82,8 @@ class User_Share_Line {
 				$this->addDividend($dividend);
 				break;
 		}
+		
+		$this->reloadVirtualData();
 	}
 
     /**
@@ -222,5 +228,40 @@ class User_Share_Line {
 		}
 		
 		return $this->share->name;
+	}
+	
+	/**
+	 * Reload virtual and overall information
+	 */
+	protected function reloadVirtualData() {
+		$this->virtual_capital = round(($this->current_price * $this->quantity * (1-$this->portfolio->fee_percent)) - $this->portfolio->fee_fixed,2);
+		$this->virtual_capital_gain = round($this->virtual_capital - $this->capital,2);
+		$this->virtual_capital_percent = 0;
+		if ($this->capital) {
+			$this->virtual_capital_percent = round($this->virtual_capital_gain / $this->capital * 100,2);
+		}
+		$this->virtual_capital_loose_gain = $this->getLooseOrGain($this->virtual_capital_percent);
+		$this->overall_gain = round($this->virtual_capital_gain + $this->gain_price,2);
+		$this->overall_percent = 0;
+		if ($this->capital) {
+			$this->overall_percent = round($this->overall_gain / $this->capital * 100,2);
+		}
+		$this->overall_loose_gain = $this->getLooseOrGain($this->overall_gain);
+	}
+	
+	/**
+	 * Return if win or loose tag
+	 * @param float $value
+	 * @return string
+	 */
+	protected function getLooseOrGain($value) {
+		if ($value < 0.0) {
+			return 'loose';
+		}
+		if ($value > 0.0) {
+			return 'gain';
+		}
+		
+		return 'neutral';
 	}
 }

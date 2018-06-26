@@ -153,31 +153,45 @@
                 <?php echo (isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency); ?>
             </td>
             <td class="current_price">
-                <span class="refresh"></span>
+                <span class="refresh">
+                    <?php echo $user_share_line->current_price; ?>
+                </span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
-            <td class="current_percent" data-loose_gain="neutral">
-                <span class="refresh"></span>
+            <td class="current_percent" data-loose_gain="<?php echo $user_share_line->current_loose_gain; ?>">
+                <span class="refresh">
+                    <?php echo $user_share_line->current_change; ?>
+                </span>
                 <?php echo ($user_share_line->quantity?'%':'-'); ?>
             </td>
             <td class="virtual_capital">
-                <span class="refresh"></span>
+                <span class="refresh">
+                    <?php echo $user_share_line->virtual_capital; ?>
+                </span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
-            <td class="virtual_capital_gain" data-loose_gain="neutral">
-                <span class="refresh"></span>
+            <td class="virtual_capital_gain" data-loose_gain="<?php echo $user_share_line->virtual_capital_loose_gain; ?>">
+                <span class="refresh">
+                    <?php echo $user_share_line->virtual_capital_gain; ?>
+                </span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
-            <td class="virtual_capital_percent" data-loose_gain="neutral">
-                <span class="refresh"></span>
+            <td class="virtual_capital_percent" data-loose_gain="<?php echo $user_share_line->virtual_capital_loose_gain; ?>">
+                <span class="refresh">
+                    <?php echo $user_share_line->virtual_capital_percent; ?>
+                </span>
                 <?php echo ($user_share_line->quantity?'%':'-'); ?>
             </td>
-            <td class="overall_gain" data-loose_gain="neutral">
-                <span class="refresh"></span>
+            <td class="overall_gain" data-loose_gain="<?php echo $user_share_line->overall_loose_gain; ?>">
+                <span class="refresh">
+                    <?php echo $user_share_line->overall_gain; ?>
+                </span>
                 <?php echo ($user_share_line->quantity?(isset($user_share_line->portfolio->currency)?$user_share_line->portfolio->currency:$currency):'-'); ?>
             </td>
-            <td class="overall_percent" data-loose_gain="neutral">
-                <span class="refresh"></span>
+            <td class="overall_percent" data-loose_gain="<?php echo $user_share_line->overall_loose_gain; ?>">
+                <span class="refresh">
+                    <?php echo $user_share_line->overall_percent; ?>
+                </span>
                 <?php echo ($user_share_line->quantity?'%':'-'); ?>
             </td>
         </tr>

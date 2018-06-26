@@ -46,6 +46,6 @@ class Portfolio {
 			$return .= '<img src="web/image/portfolio/'.$this->logo.'" alt="'.$this->name.'" title="'.$this->name.'"/>';
 		}
 		
-		return $return;
+		return '<span style=color="'.$this->color.'">'.$return.'</span>';
 	}
 }

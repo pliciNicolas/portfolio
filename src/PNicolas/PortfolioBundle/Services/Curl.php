@@ -20,6 +20,7 @@ class Curl {
             CURLOPT_VERBOSE => 1,
             CURLOPT_HEADER => 1,
             CURLOPT_CONNECTTIMEOUT => 0,
+            CURLINFO_HEADER_OUT => 1,
 		);
 		
 		return $this->performRequest($url, $method, $data_get, $data_post, $header_to_send, $curl_options);

@@ -46,7 +46,7 @@ class Share {
 			$return .= '<img src="web/image/share/'.$this->logo.'" alt="'.$this->name.'" title="'.$this->name.'"/>';
 		}
 		
-		return $return;
+		return '<span style=color="'.$this->color.'">'.$return.'</span>';
 	}
 	
 	public function setPrice() {
@@ -81,7 +81,7 @@ class Share {
 					break;
 			}
 			if (!is_null($this->open_price)) {
-				$this->current_change = $this->open_price - $this->current_price / $this->open_price * 100;
+				$this->current_change = ($this->open_price - $this->current_price) / $this->open_price * 100;
 			}
 		}
 	}
